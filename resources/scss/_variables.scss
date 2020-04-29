@@ -1,0 +1,25 @@
+/* Colors */
+$light-grey: #cacaca !default;
+$bright-green: #00b52f !default;
+$light-green: #4fcc6a !default;
+$pale-green: #bdeabc !default;
+$pale-white: #e1e1e1 !default;
+$blue-dark: #343a40 !default;
+$blue-green: #00b59c !default;
+
+$tp-dark: rgba(39, 39, 39, 0.85) !default;
+
+/* Borders */
+$border-color-light-grey: $light-grey !default;
+
+/* Shadows */
+$shadow-color: rgba(0, 0, 0, 0.6) !default;
+$shadow-box: 2px 2px 5px 0 $shadow-color !default;
+$shadow-glow: 0px 0px 7px 0 $shadow-color !default;
+$shadow-card: 0 4px 8px 0px $shadow-color !default;
+
+// Borders
+$border-color: #afafaf;
+
+// Tables
+$table-border-color: $border-color;

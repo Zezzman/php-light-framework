@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "ES6",
+        "target": "ES5",
+        "sourceMap": false,
+        "outDir": "../../public/assets/javascript/",
+    },
+    "include": [
+        "./**/*",
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts",
+    ]
+}

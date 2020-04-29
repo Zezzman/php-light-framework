@@ -1,0 +1,15 @@
+{
+    "autoload": {
+        "psr-4": {
+            "System\\": "src/",
+
+            "System\\Controllers\\": "http/controllers/",
+            "System\\API\\": "http/api/",
+            "System\\CLI\\": "cli/"
+        }
+    },
+    "require" : {
+        "php" : "^7.0",
+        "phpunit/phpunit": "^8.5"
+    }
+}

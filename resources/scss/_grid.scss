@@ -1,0 +1,100 @@
+.grid
+{
+    display: grid;
+
+    .grid-row {
+        display: grid;
+        grid-template: "grid-column";
+    }
+    .grid-column
+    {
+        display: grid;
+        grid-area: grid-column;
+        grid-column: auto;
+    }
+}
+.grid-2
+{
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.form-grid {
+    .form-body {
+        @extend .row;
+        margin: 0;
+    }
+    .form-row {
+        @extend .row;
+        
+        > div {
+            padding: .5rem 1rem .5rem 1rem;
+        }
+    }
+    .form-row-bold {
+        @extend .row;
+        font-weight: bold;
+        > div {
+            padding: .5rem 1rem .5rem 1rem;
+        }
+    }
+    .form-row-input {
+        @extend .row;
+        
+        > div {
+            padding: .5rem 1rem .5rem 1rem;
+        }
+    }
+    .form-header {
+        @extend .row;
+        font-weight: bold;
+        margin: 0;
+
+        > div {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    }
+    .form-submission {
+        @extend .row;
+        margin: 0;
+
+        > div {
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+        }
+    }
+}
+
+.table-simple
+{
+    background-color: $blue-dark;
+
+    tbody
+    {
+        border-top-color: $gray-400 !important;
+        background-color: white;
+
+        tr
+        {
+            td
+            {
+                padding: 0.1rem;
+                input:not(:focus)
+                {
+                    border: 0 !important;
+                    border-radius: 0;
+                }
+            }
+        }
+    }
+}
+.table-row-link:hover
+{
+    cursor: pointer;
+    
+    td
+    {
+        background-color: $gray-600;
+    }
+}

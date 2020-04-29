@@ -1,0 +1,12 @@
+*
+!environments/
+!.gitignore
+!app.php
+!auth.php
+!collection.php
+!database.php
+!layout.php
+!links.php
+!namespaces.php
+!paths.php
+!permissions.php

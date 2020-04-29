@@ -1,0 +1,31 @@
+/* Body */
+$body-color: $white;
+$body-bg: $blue-dark;
+.body-bg
+{
+    color: $body-color;
+    background-color: $body-bg;
+}
+
+/* Overlay */
+$overlay-color: $white;
+$overlay-bg: $tp-dark;
+
+/* Title */
+$title-color: $white;
+$title-bg: $blue-green;
+$title-link-color: $white;
+$title-link-hover-color: $pale-green;
+
+/* Containers */
+$container-color: $white;
+$container-bg: $blue-green;
+$container-alt-color: $black;
+$container-alt-bg: $gray-400;
+
+/* Borders */
+$border-color: $white;
+hr
+{
+    border-color: $border-color;
+}

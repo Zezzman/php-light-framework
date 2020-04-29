@@ -1,0 +1,264 @@
+/* Colors */
+.color-green
+{
+    color: $green;
+}
+.color-light-green
+{
+    color: $light-green;
+}
+.color-pale-green
+{
+    color: $pale-green;
+}
+.bg-light-green
+{
+    background-color: $light-green;
+}
+.bg-pale-green
+{
+    background-color: $pale-green;
+}
+
+/* heights & widths */
+.h-min
+{
+    height: min-content;
+}
+
+/* view port */
+.vh-100
+{
+    height: 100vh;
+}
+.vh-90
+{
+    height: 90vh;
+}
+.vh-85
+{
+    height: 85vh;
+}
+.vh-75
+{
+    height: 75vh;
+}
+.vh-50
+{
+    height: 50vh;
+}
+.vh-25
+{
+    height: 25vh;
+}
+.vh-10
+{
+    height: 10vh;
+}
+
+.vw-100
+{
+    width: 100vw;
+}
+.vw-90
+{
+    width: 90vw;
+}
+.vw-75
+{
+    width: 75vw;
+}
+.vw-50
+{
+    width: 50vw;
+}
+.vw-25
+{
+    width: 25vw;
+}
+.vw-10
+{
+    width: 10vw;
+}
+
+/* Shadows */
+.shadow
+{
+    box-shadow: $shadow-box;
+}
+.shadow-glow
+{
+    box-shadow: $shadow-glow;
+}
+.card-shadow
+{
+    padding: 0;
+    box-shadow: $shadow-card;
+}
+
+/* Rows */
+.bold-row {
+    @extend .row;
+    * {
+        font-weight: bold;
+    }
+}
+
+/* Columns */
+.col-min {
+    @extend .col;
+    flex-grow: unset;
+    flex-basis: content;
+}
+
+/* navbar */
+.navbar-sm {
+    @extend .navbar;
+    @include media-breakpoint-up(md) { 
+        height: 2rem;
+        .nav-link
+        {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    }
+}
+
+/* Overlay */
+.img-overlay
+{   
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    transition: .5s ease;
+    opacity: 0;
+    padding: 0.5rem;
+    color: white;
+    box-shadow: inset 0 4px 10px 0px rgba(0, 0, 0, 0.3);
+    background-color: $overlay-bg;
+
+    &-fill
+    {   
+        top: 0;
+    }
+    &-gray
+    {   
+        box-shadow: inset 0px 0px 20px 0px rgb(200, 200, 200);
+        background-color: rgba(200, 200, 200, 0.1);
+    }
+    &-clear
+    {   
+        background-color: #00000000;
+        box-shadow: none;
+    }
+    &:hover
+    {
+        opacity: 1;
+    }
+    &-invert
+    {
+        @extend .img-overlay;
+        opacity: 1;
+
+        &:hover
+        {
+            opacity: 0;
+        }
+    }
+}
+/* Tooltip */
+
+
+/* Anchors */
+a.link
+{
+    text-decoration: none;
+    color: $link-color;
+}
+a.link:hover,
+a.link:focus
+{
+    text-decoration: $link-hover-decoration;
+    color: $link-hover-color;
+}
+
+/* Body */
+body
+{
+    height: 100%;
+    margin: 0;
+    color: $body-color;
+    background-color: $body-bg;
+}
+
+/* Footers */
+.footer-min
+{
+    color: $body-color;
+    background-color: $body-bg;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
+/* Titles */
+.title
+{
+    color: $title-color;
+    background-color: $title-bg;
+    h1
+    {
+        font-family: sans-serif;
+    }
+    a
+    {
+        text-decoration: none;
+        color: $title-link-color;
+    }
+    a:hover,
+    a:focus
+    {
+        text-decoration: none;
+        color: $title-link-hover-color;
+    }
+}
+
+/* Containers */
+.container-fluid
+{
+    color: $container-color;
+    background-color: $container-bg;
+}
+.container-inner
+{
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    @include media-breakpoint-down(sm) {
+        max-width: 15rem;
+    }
+    @include media-breakpoint-down(md) {
+        max-width: 45rem;
+    }
+    @include media-breakpoint-down(lg) {
+        max-width: 60rem;
+    }
+    @include media-breakpoint-up(xl) {
+        max-width: 100rem;
+    }
+}
+.container-fluid-alt
+{
+    @extend .container-fluid;
+    color: $container-alt-color;
+    background-color: $container-alt-bg;
+}
+
+/* Errors */
+.error
+{
+    @extend .is-invalid;
+}
