@@ -17,7 +17,7 @@ final class StorageController extends Controller
     {
         $viewModel = new ViewModel();
         if (is_array($location) && ! empty($location)) {
-            $path = array_reduce($location, function ($str, $item) { return $str . '/' . $item; });
+            $path = array_reduce($location, function ($str, $item) { return $str . $item . '/'; });
         }
         return $this->view('storage', $viewModel, ['path' => $path ?? '', 'extensions' => $extensions]);
     }

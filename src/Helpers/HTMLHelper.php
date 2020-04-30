@@ -49,10 +49,19 @@ final class HTMLHelper
         $html = '';
         if (! empty($dir)) {
             $linkBase = rtrim($linkBase ?? config('LINKS.PUBLIC'), '/');
+            $root = requireConfig('PATHS.ROOT');
             $files = MediaFileProvider::listFiles($dir, $includeFolders);
             foreach ($files as $file) {
-                $html .= '<a href="' . $linkBase . '/' . DataCleanerHelper::dataMap($file, '/')
-                . '" style="display:block">' . DataCleanerHelper::dataMap($file, '/', null, 0, -1) . '</a>';
+                if ($includeFolders && is_dir($root . $file))
+                {
+                    $html .= '<a href="' . $linkBase . $file .'/'
+                    . '" style="display:block">/' . DataCleanerHelper::dataMap($file, '/', null, 0, -1) . '</a>';
+                }
+                else
+                {
+                    $html .= '<a href="' . $linkBase . $file . '/'
+                    . '" style="display:block">' . trim(DataCleanerHelper::dataMap($file, '/', null, 0, -1), '/') . '</a>';
+                }
             }
         }
         return $html;
