@@ -3,12 +3,6 @@
   "version": "1.0.0",
   "description": "required node packages",
   "main": "../public/assets/javascript/index.js",
-  "dependencies": {
-    "bootstrap": "^4.4.1",
-    "jquery": "^3.4.1",
-    "jquery-validation": "^1.19.1",
-    "popper.js": "^1.16.1"
-  },
   "devDependencies": {
     "@types/jquery": "^3.3.35",
     "@types/jquery.validation": "^1.16.6"
