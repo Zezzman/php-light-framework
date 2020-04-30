@@ -1,3 +1,17 @@
+/* Tags */
+body
+{
+    height: 100%;
+    margin: 0;
+    color: $body-color;
+    background-color: $body-bg;
+}
+
+hr
+{
+    border-color: $border-color;
+}
+
 /* Colors */
 .color-green
 {
@@ -184,15 +198,6 @@ a.link:focus
     color: $link-hover-color;
 }
 
-/* Body */
-body
-{
-    height: 100%;
-    margin: 0;
-    color: $body-color;
-    background-color: $body-bg;
-}
-
 /* Footers */
 .footer-min
 {
@@ -202,34 +207,7 @@ body
     padding-bottom: .5rem;
 }
 
-/* Titles */
-.title
-{
-    color: $title-color;
-    background-color: $title-bg;
-    h1
-    {
-        font-family: sans-serif;
-    }
-    a
-    {
-        text-decoration: none;
-        color: $title-link-color;
-    }
-    a:hover,
-    a:focus
-    {
-        text-decoration: none;
-        color: $title-link-hover-color;
-    }
-}
-
 /* Containers */
-.container-fluid
-{
-    color: $container-color;
-    background-color: $container-bg;
-}
 .container-inner
 {
     width: 100%;
@@ -250,11 +228,22 @@ body
         max-width: 100rem;
     }
 }
-.container-fluid-alt
+
+/* Backgrounds */
+.title
 {
-    @extend .container-fluid;
-    color: $container-alt-color;
-    background-color: $container-alt-bg;
+    color: $title-color;
+    background-color: $title-bg;
+}
+.section
+{
+    color: $section-color;
+    background-color: $section-bg;
+}
+.section-alt
+{
+    color: $section-alt-color;
+    background-color: $section-alt-bg;
 }
 
 /* Errors */

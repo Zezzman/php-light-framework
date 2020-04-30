@@ -5989,8 +5989,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: 900;
   font-display: block;
-  src: url("../webfonts/fa-solid-900.eot");
-  src: url("../webfonts/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../webfonts/fa-solid-900.woff2") format("woff2"), url("../webfonts/fa-solid-900.woff") format("woff"), url("../webfonts/fa-solid-900.ttf") format("truetype"), url("../webfonts/fa-solid-900.svg#fontawesome") format("svg");
+  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.eot");
+  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2") format("woff2"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff") format("woff"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf") format("truetype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.svg#fontawesome") format("svg");
 }
 .fa,
 .fas {
@@ -6007,8 +6007,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url("../webfonts/fa-brands-400.eot");
-  src: url("../webfonts/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../webfonts/fa-brands-400.woff2") format("woff2"), url("../webfonts/fa-brands-400.woff") format("woff"), url("../webfonts/fa-brands-400.ttf") format("truetype"), url("../webfonts/fa-brands-400.svg#fontawesome") format("svg");
+  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.eot");
+  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2") format("woff2"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff") format("woff"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf") format("truetype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.svg#fontawesome") format("svg");
 }
 .fab {
   font-family: 'Font Awesome 5 Brands';
@@ -6016,7 +6016,7 @@ readers do not read off random characters that represent icons */
 }
 
 /*!
- * Bootstrap v4.4.1 (https://getbootstrap.com/)
+ * Bootstrap v4.3.1 (https://getbootstrap.com/)
  * Copyright 2011-2019 The Bootstrap Authors
  * Copyright 2011-2019 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
@@ -6514,7 +6514,7 @@ mark,
 code {
   font-size: 87.5%;
   color: #e83e8c;
-  word-wrap: break-word;
+  word-break: break-word;
 }
 a > code {
   color: inherit;
@@ -6577,7 +6577,7 @@ pre code {
   }
 }
 
-.container-fluid, .container-sm, .container-md, .container-lg, .container-xl, .container-fluid-alt {
+.container-fluid, .container-sm, .container-md, .container-lg, .container-xl {
   width: 100%;
   padding-right: 15px;
   padding-left: 15px;
@@ -9311,8 +9311,8 @@ input[type="button"].btn-block {
 .input-group > .custom-select,
 .input-group > .custom-file {
   position: relative;
-  flex: 1 1 0%;
-  min-width: 0;
+  flex: 1 1 auto;
+  width: 1%;
   margin-bottom: 0;
 }
 .input-group > .form-control + .form-control,
@@ -9961,9 +9961,7 @@ input[type="button"].btn-block {
 .navbar .container-lg,
 .navbar-sm .container-lg,
 .navbar .container-xl,
-.navbar-sm .container-xl,
-.navbar .container-fluid-alt,
-.navbar-sm .container-fluid-alt {
+.navbar-sm .container-xl {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -10039,8 +10037,7 @@ input[type="button"].btn-block {
   .navbar-expand-sm > .container-sm,
   .navbar-expand-sm > .container-md,
   .navbar-expand-sm > .container-lg,
-  .navbar-expand-sm > .container-xl,
-  .navbar-expand-sm > .container-fluid-alt {
+  .navbar-expand-sm > .container-xl {
     padding-right: 0;
     padding-left: 0;
   }
@@ -10065,8 +10062,7 @@ input[type="button"].btn-block {
   .navbar-expand-sm > .container-sm,
   .navbar-expand-sm > .container-md,
   .navbar-expand-sm > .container-lg,
-  .navbar-expand-sm > .container-xl,
-  .navbar-expand-sm > .container-fluid-alt {
+  .navbar-expand-sm > .container-xl {
     flex-wrap: nowrap;
   }
   .navbar-expand-sm .navbar-collapse {
@@ -10083,8 +10079,7 @@ input[type="button"].btn-block {
   .navbar-expand-md > .container-sm,
   .navbar-expand-md > .container-md,
   .navbar-expand-md > .container-lg,
-  .navbar-expand-md > .container-xl,
-  .navbar-expand-md > .container-fluid-alt {
+  .navbar-expand-md > .container-xl {
     padding-right: 0;
     padding-left: 0;
   }
@@ -10109,8 +10104,7 @@ input[type="button"].btn-block {
   .navbar-expand-md > .container-sm,
   .navbar-expand-md > .container-md,
   .navbar-expand-md > .container-lg,
-  .navbar-expand-md > .container-xl,
-  .navbar-expand-md > .container-fluid-alt {
+  .navbar-expand-md > .container-xl {
     flex-wrap: nowrap;
   }
   .navbar-expand-md .navbar-collapse {
@@ -10127,8 +10121,7 @@ input[type="button"].btn-block {
   .navbar-expand-lg > .container-sm,
   .navbar-expand-lg > .container-md,
   .navbar-expand-lg > .container-lg,
-  .navbar-expand-lg > .container-xl,
-  .navbar-expand-lg > .container-fluid-alt {
+  .navbar-expand-lg > .container-xl {
     padding-right: 0;
     padding-left: 0;
   }
@@ -10153,8 +10146,7 @@ input[type="button"].btn-block {
   .navbar-expand-lg > .container-sm,
   .navbar-expand-lg > .container-md,
   .navbar-expand-lg > .container-lg,
-  .navbar-expand-lg > .container-xl,
-  .navbar-expand-lg > .container-fluid-alt {
+  .navbar-expand-lg > .container-xl {
     flex-wrap: nowrap;
   }
   .navbar-expand-lg .navbar-collapse {
@@ -10171,8 +10163,7 @@ input[type="button"].btn-block {
   .navbar-expand-xl > .container-sm,
   .navbar-expand-xl > .container-md,
   .navbar-expand-xl > .container-lg,
-  .navbar-expand-xl > .container-xl,
-  .navbar-expand-xl > .container-fluid-alt {
+  .navbar-expand-xl > .container-xl {
     padding-right: 0;
     padding-left: 0;
   }
@@ -10197,8 +10188,7 @@ input[type="button"].btn-block {
   .navbar-expand-xl > .container-sm,
   .navbar-expand-xl > .container-md,
   .navbar-expand-xl > .container-lg,
-  .navbar-expand-xl > .container-xl,
-  .navbar-expand-xl > .container-fluid-alt {
+  .navbar-expand-xl > .container-xl {
     flex-wrap: nowrap;
   }
   .navbar-expand-xl .navbar-collapse {
@@ -10218,8 +10208,7 @@ input[type="button"].btn-block {
 .navbar-expand > .container-sm,
 .navbar-expand > .container-md,
 .navbar-expand > .container-lg,
-.navbar-expand > .container-xl,
-.navbar-expand > .container-fluid-alt {
+.navbar-expand > .container-xl {
   padding-right: 0;
   padding-left: 0;
 }
@@ -10238,8 +10227,7 @@ input[type="button"].btn-block {
 .navbar-expand > .container-sm,
 .navbar-expand > .container-md,
 .navbar-expand > .container-lg,
-.navbar-expand > .container-xl,
-.navbar-expand > .container-fluid-alt {
+.navbar-expand > .container-xl {
   flex-wrap: nowrap;
 }
 .navbar-expand .navbar-collapse {
@@ -10352,7 +10340,6 @@ input[type="button"].btn-block {
 
 .card-body {
   flex: 1 1 auto;
-  min-height: 1px;
   padding: 1.25rem;
 }
 
@@ -10419,49 +10406,55 @@ input[type="button"].btn-block {
   padding: 1.25rem;
 }
 
-.card-img,
-.card-img-top,
-.card-img-bottom {
-  flex-shrink: 0;
+.card-img {
   width: 100%;
+  border-radius: calc(0.25rem - 1px);
 }
 
-.card-img,
 .card-img-top {
+  width: 100%;
   border-top-left-radius: calc(0.25rem - 1px);
   border-top-right-radius: calc(0.25rem - 1px);
 }
 
-.card-img,
 .card-img-bottom {
+  width: 100%;
   border-bottom-right-radius: calc(0.25rem - 1px);
   border-bottom-left-radius: calc(0.25rem - 1px);
 }
 
+.card-deck {
+  display: flex;
+  flex-direction: column;
+}
 .card-deck .card {
   margin-bottom: 15px;
 }
 @media (min-width: 576px) {
   .card-deck {
-    display: flex;
     flex-flow: row wrap;
     margin-right: -15px;
     margin-left: -15px;
   }
   .card-deck .card {
+    display: flex;
     flex: 1 0 0%;
+    flex-direction: column;
     margin-right: 15px;
     margin-bottom: 0;
     margin-left: 15px;
   }
 }
 
+.card-group {
+  display: flex;
+  flex-direction: column;
+}
 .card-group > .card {
   margin-bottom: 15px;
 }
 @media (min-width: 576px) {
   .card-group {
-    display: flex;
     flex-flow: row wrap;
   }
   .card-group > .card {
@@ -10517,17 +10510,23 @@ input[type="button"].btn-block {
 .accordion > .card {
   overflow: hidden;
 }
-.accordion > .card:not(:last-of-type) {
+.accordion > .card:not(:first-of-type) .card-header:first-child {
+  border-radius: 0;
+}
+.accordion > .card:not(:first-of-type):not(:last-of-type) {
+  border-bottom: 0;
+  border-radius: 0;
+}
+.accordion > .card:first-of-type {
   border-bottom: 0;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
-.accordion > .card:not(:first-of-type) {
+.accordion > .card:last-of-type {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-.accordion > .card > .card-header {
-  border-radius: 0;
+.accordion > .card .card-header {
   margin-bottom: -1px;
 }
 
@@ -10585,7 +10584,7 @@ input[type="button"].btn-block {
   border-color: #dee2e6;
 }
 .page-link:focus {
-  z-index: 3;
+  z-index: 2;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
@@ -10600,7 +10599,7 @@ input[type="button"].btn-block {
   border-bottom-right-radius: 0.25rem;
 }
 .page-item.active .page-link {
-  z-index: 3;
+  z-index: 1;
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
@@ -11684,7 +11683,7 @@ a.close.disabled {
   margin-bottom: 0.5rem;
 }
 .bs-popover-top > .arrow, .bs-popover-auto[x-placement^="top"] > .arrow {
-  bottom: calc(-0.5rem - 1px);
+  bottom: calc((0.5rem + 1px) * -1);
 }
 .bs-popover-top > .arrow::before, .bs-popover-auto[x-placement^="top"] > .arrow::before {
   bottom: 0;
@@ -11701,7 +11700,7 @@ a.close.disabled {
   margin-left: 0.5rem;
 }
 .bs-popover-right > .arrow, .bs-popover-auto[x-placement^="right"] > .arrow {
-  left: calc(-0.5rem - 1px);
+  left: calc((0.5rem + 1px) * -1);
   width: 0.5rem;
   height: 1rem;
   margin: 0.3rem 0;
@@ -11721,7 +11720,7 @@ a.close.disabled {
   margin-top: 0.5rem;
 }
 .bs-popover-bottom > .arrow, .bs-popover-auto[x-placement^="bottom"] > .arrow {
-  top: calc(-0.5rem - 1px);
+  top: calc((0.5rem + 1px) * -1);
 }
 .bs-popover-bottom > .arrow::before, .bs-popover-auto[x-placement^="bottom"] > .arrow::before {
   top: 0;
@@ -11748,7 +11747,7 @@ a.close.disabled {
   margin-right: 0.5rem;
 }
 .bs-popover-left > .arrow, .bs-popover-auto[x-placement^="left"] > .arrow {
-  right: calc(-0.5rem - 1px);
+  right: calc((0.5rem + 1px) * -1);
   width: 0.5rem;
   height: 1rem;
   margin: 0.3rem 0;
@@ -15946,16 +15945,17 @@ a.text-dark:hover, a.text-dark:focus {
 /* Colors */
 /* Borders */
 /* Shadows */
-/* Body */
-.body-bg {
+/* Overlay */
+/* Backgrounds */
+/* Borders */
+/* Tags */
+body {
+  height: 100%;
+  margin: 0;
   color: #fff;
   background-color: #343a40;
 }
 
-/* Overlay */
-/* Title */
-/* Containers */
-/* Borders */
 hr {
   border-color: #fff;
 }
@@ -16123,14 +16123,6 @@ a.link:focus {
   color: #0056b3;
 }
 
-/* Body */
-body {
-  height: 100%;
-  margin: 0;
-  color: #fff;
-  background-color: #343a40;
-}
-
 /* Footers */
 .footer-min {
   color: #fff;
@@ -16139,30 +16131,7 @@ body {
   padding-bottom: .5rem;
 }
 
-/* Titles */
-.title {
-  color: #fff;
-  background-color: #00b59c;
-}
-.title h1 {
-  font-family: sans-serif;
-}
-.title a {
-  text-decoration: none;
-  color: #fff;
-}
-.title a:hover,
-.title a:focus {
-  text-decoration: none;
-  color: #bdeabc;
-}
-
 /* Containers */
-.container-fluid, .container-sm, .container-md, .container-lg, .container-xl, .container-fluid-alt {
-  color: #fff;
-  background-color: #00b59c;
-}
-
 .container-inner {
   width: 100%;
   padding-right: 15px;
@@ -16191,7 +16160,18 @@ body {
   }
 }
 
-.container-fluid-alt {
+/* Backgrounds */
+.title {
+  color: #fff;
+  background-color: #00b59c;
+}
+
+.section {
+  color: #fff;
+  background-color: #343a40;
+}
+
+.section-alt {
   color: #000;
   background-color: #ced4da;
 }

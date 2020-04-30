@@ -10,7 +10,6 @@
     "popper.js": "^1.16.1"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.12.1",
     "@types/jquery": "^3.3.35",
     "@types/jquery.validation": "^1.16.6"
   },

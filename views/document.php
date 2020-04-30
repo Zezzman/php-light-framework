@@ -6,6 +6,7 @@
         <div class="col-12">
             <p>
                 Documentation of template features
+                <i class="fas fa-times"></i>
             </p>
         </div>
     </div>
