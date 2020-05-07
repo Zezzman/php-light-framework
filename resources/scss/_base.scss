@@ -126,8 +126,7 @@ hr
 }
 
 /* navbar */
-.navbar-sm {
-    @extend .navbar;
+.navbar {
     @include media-breakpoint-up(md) { 
         height: 2rem;
         .nav-link

@@ -5989,8 +5989,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: 900;
   font-display: block;
-  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.eot");
-  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2") format("woff2"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff") format("woff"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf") format("truetype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.svg#fontawesome") format("svg");
+  src: url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.eot");
+  src: url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2") format("woff2"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff") format("woff"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf") format("truetype"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.svg#fontawesome") format("svg");
 }
 .fa,
 .fas {
@@ -6007,8 +6007,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.eot");
-  src: url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2") format("woff2"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff") format("woff"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf") format("truetype"), url("../plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.svg#fontawesome") format("svg");
+  src: url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.eot");
+  src: url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2") format("woff2"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff") format("woff"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf") format("truetype"), url("/php-light-framework/assets/plugins/node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.svg#fontawesome") format("svg");
 }
 .fab {
   font-family: 'Font Awesome 5 Brands';
@@ -9943,7 +9943,7 @@ input[type="button"].btn-block {
   display: block;
 }
 
-.navbar, .navbar-sm {
+.navbar {
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -9951,17 +9951,12 @@ input[type="button"].btn-block {
   justify-content: space-between;
   padding: 0.5rem 1rem;
 }
-.navbar .container, .navbar-sm .container,
+.navbar .container,
 .navbar .container-fluid,
-.navbar-sm .container-fluid,
 .navbar .container-sm,
-.navbar-sm .container-sm,
 .navbar .container-md,
-.navbar-sm .container-md,
 .navbar .container-lg,
-.navbar-sm .container-lg,
-.navbar .container-xl,
-.navbar-sm .container-xl {
+.navbar .container-xl {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -15875,7 +15870,7 @@ a.text-dark:hover, a.text-dark:focus {
     min-width: 992px !important;
   }
 
-  .navbar, .navbar-sm {
+  .navbar {
     display: none;
   }
 
@@ -16066,10 +16061,10 @@ hr {
 
 /* navbar */
 @media (min-width: 768px) {
-  .navbar-sm {
+  .navbar {
     height: 2rem;
   }
-  .navbar-sm .nav-link {
+  .navbar .nav-link {
     padding-top: 0;
     padding-bottom: 0;
   }
@@ -16248,4 +16243,4 @@ a.link:focus {
   background-color: #6c757d;
 }
 
-/*# sourceMappingURL=style.css.map */
+/*# sourceMappingURL=layout.css.map */
