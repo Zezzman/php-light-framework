@@ -2,6 +2,8 @@
 namespace System\Helpers;
 
 use System\Helpers\QueryHelper;
+use System\Helpers\ArrayHelper;
+use Exception;
 /**
  * 
  */
@@ -12,6 +14,7 @@ final class FileHelper
      */
     public static function loadFile(string $path, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false)
     {
+        $path = self::secureRequiredPath($path);
         if (file_exists($path) && is_file($path)) {
             if (! is_null($codes)) {
                 $content = file_get_contents($path);
@@ -28,6 +31,7 @@ final class FileHelper
      */
     public static function printImage(string $path, string $type = 'image/png', string $description = '', string $style = '<img src="data:{type};{base},{data}" alt="{description}">')
     {
+        $path = self::securePath($path);
         if (file_exists($path) && is_file($path)) {
             $file = [
                 'path' => $path,
@@ -36,7 +40,7 @@ final class FileHelper
                 'type' => $type,
                 'base' => 'base64',
             ];
-            return QueryHelper::insertCodes($file, $style);
+            return QueryHelper::scanCodes($file, $style);
         } else {
             return '';
         }
@@ -46,6 +50,7 @@ final class FileHelper
      */
     public static function readFile(string $path, string $type, bool $setHeader = true)
     {
+        $path = self::securePath($path);
         if (file_exists($path) && is_file($path)) {
             ob_clean();
             if ($setHeader) {
@@ -128,7 +133,7 @@ final class FileHelper
                         $script['code'] .= QueryHelper::scanCodes($script['var'], 'var {KEY} = {VALUE};', [], true) . "\n";
                     }
                     if (isset($script['path']) && ! empty($script['path'])) {
-                        $file = FileHelper::loadFile($script['path']);
+                        $file = self::loadFile($script['path']);
                         if (! empty($file)) {
                             $script['code'] .= $file;
                         }
@@ -141,10 +146,80 @@ final class FileHelper
         return $html;
     }
     /**
-     * Store to File
+     * Load secret php files
+     * 
+     * @param   array       $files              php files within a secret folder
+     * @param   string      $key                key name within secret array
+     * @param   mix         $default            default value when value is not found
+     * 
+     * @return  mix         return whole array or value of the provided key within secret file
      */
-    public static function storeFile()
+    public static function loadSecrets($files, string $key = null, $default = false)
     {
+        $files = (array) $files;
+        $secrets = [];
+        foreach ($files as $file) {
+            $path = self::securePath('secrets/' . $file . '.php');
+            if ($path !== false)
+            {
+                $content = include($path);
+                if (is_array($content))
+                {
+                    $secrets = ArrayHelper::mergeRecursively($secrets, $content);
+                }
+            }
+        }
+        if (is_string($key))
+        {
+            $constant = ArrayHelper::deepSearch($secrets, strtoupper($key), '.');
+            if (is_null($constant)) {
+                return $default;
+            } else {
+                return $constant;
+            }
+        }
+        else
+        {
+            return $secrets;
+        }
+    }
+    public static function securePath(string $name)
+    {
+        $name = DataCleanerHelper::cleanValue($name);
 
+        $root = config('PATHS.ROOT');
+        if (file_exists($path = ($root .  $name)))
+        {
+            return $path;
+        }
+        else if (($path = self::findResource($name)) !== false)
+        {
+            return $path;
+        }
+        return false;
+    }
+    public static function secureRequiredPath(string $name)
+    {
+        if (empty($path = self::securePath($name)))
+        {
+            throw new Exception('Missing file : ' . $name);
+        }
+        else
+        {
+            return $path;
+        }
+    }
+    public static function findResource(string $name)
+    {
+        $root = requireConfig('PATHS.ROOT');
+        $resources = (array) requireConfig('PATHS.RESOURCES');
+        foreach ($resources as $resource)
+        {
+            if (file_exists($path = $root . $resource .  $name))
+            {
+                return $path;
+            }
+        }
+        return false;
     }
 }

@@ -5,8 +5,9 @@ use System\ViewData;
 use System\Interfaces\IController;
 use System\Interfaces\IViewModel;
 use System\Factories\ViewFactory;
-use System\Helpers\DataCleanerHelper;
 use System\Helpers\HTTPHelper;
+use System\Helpers\FileHelper;
+use System\Helpers\ArrayHelper;
 use Exception;
 /**
  * View
@@ -26,17 +27,17 @@ class View
     /**
      * 
      */
-    private function __construct(IController $controller, string $name, IViewModel $model = null, array $bag = [])
+    private function __construct(IController $controller)
     {
         $this->controller = $controller;
     }
     /**
      * 
      */
-    public static function create(IController $controller, string $name, IViewModel $model = null, array $bag = [])
+    public static function create(IController $controller, string $name, string $type, IViewModel $model = null, array $bag = [])
     {
-        $view = new self($controller, $name, $model, $bag);
-        $viewData = ViewFactory::createView($name, $model, $bag);
+        $view = new self($controller);
+        $viewData = ViewFactory::createView($name, $type, $model, $bag);
         if ($viewData->valid()) {
             $view->currentView = $viewData;
             $view->viewData[$name] = $viewData;
@@ -44,24 +45,7 @@ class View
                 $view->layout(config('LAYOUT.DEFAULT'));
             }
         }
-        if ($view->viewData($name)->valid()) {
-            return $view;
-        } else {
-            return null;
-        }
-    }
-    public static function createResponse(IController $controller, string $name, IViewModel $model = null, array $bag = [])
-    {
-        $view = new self($controller, $name, $model, $bag);
-        $viewData = ViewFactory::createResponse($name, $model, $bag);
-        if ($viewData->valid()) {
-            $view->currentView = $viewData;
-            $view->viewData[$name] = $viewData;
-            if (config('LAYOUT.DEFAULT', false) !== false) {
-                $view->layout(config('LAYOUT.DEFAULT'));
-            }
-        }
-        if ($view->viewData($name)->valid()) {
+        if (! is_null($view->currentView) && $view->currentView->valid()) {
             return $view;
         } else {
             return null;
@@ -77,10 +61,10 @@ class View
     /**
      * 
      */
-    public function appendView(string $name, IViewModel $model = null, array $bag = [])
+    public function appendView(string $name, string $type, IViewModel $model = null, array $bag = [])
     {
         if (! isset($this->viewData[$name])) {
-            $viewData = ViewFactory::createView($name, $model, $bag);
+            $viewData = ViewFactory::createView($name, $type, $model, $bag);
             if ($viewData->valid()) {
                 $this->currentView = $viewData;
                 $this->viewData[$name] = $viewData;
@@ -101,22 +85,22 @@ class View
      */
     public function layout(string $name = null)
     {
-        $this->layout = ViewFactory::securePath('layouts/' . $name);
+        $this->layout = 'layouts/' . $name  . '.php';
     }
     private function header(string $name, array $bag = null)
     {
-        return $this->loadFile(ViewFactory::securePath('headers/' . $name), $bag);
+        return $this->loadFile('headers/' . $name  . '.php', $bag);
     }
     private function footer(string $name, array $bag = null)
     {
-        return $this->loadFile(ViewFactory::securePath('footers/' . $name), $bag);
+        return $this->loadFile('footers/' . $name  . '.php', $bag);
     }
     /**
      * 
      */
     private function section(string $name, array $bag = null)
     {
-        return $this->loadFile(ViewFactory::securePath('sections/' . $name), $bag);
+        return $this->loadFile('sections/' . $name  . '.php', $bag);
     }
     /**
      * 
@@ -131,18 +115,33 @@ class View
         if (is_null($bag)) {
             if (! is_null($viewData)
             && ! is_null($viewData->bag)) {
-                $bag = &$this->currentView->bag;
+                $bag = $this->currentView->bag; // view bag
             } else {
                 $bag = [];
             }
         }
+        else
+        {
+            if (! is_null($viewData)
+            && ! is_null($viewData->bag)) {
+                $bag = ArrayHelper::mergeRecursively($this->currentView->bag, $bag); // add additional items to view bag
+            }
+        }
 
+        $path = FileHelper::secureRequiredPath($path);
         if (! empty($path)) {
             if (file_exists($path)) {
                 return include($path);
             }
         }
         return false;
+    }
+    /**
+     * 
+     */
+    public function card(string $name, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false)
+    {
+        echo FileHelper::loadFile('cards/' . $name, $codes, $defaults, $list, $listLength, $allowEmpty);
     }
     /**
      * 
@@ -190,7 +189,7 @@ class View
                 // render view
                 echo $content . $this->append;
             } else {
-                ob_clean();
+                throw new Exception('Loaded Empty Layout');
             }
         }
     }

@@ -195,7 +195,7 @@ class RequestFactory
     {
         $params = $request->params;
         if (is_array($params) && ! empty($params)) {
-            $request->uri = QueryHelper::insertCodes($params, $request->requestPattern);
+            $request->uri = QueryHelper::scanCodes($params, $request->requestPattern);
         } else {
             $request->uri = $request->requestPattern;
         }

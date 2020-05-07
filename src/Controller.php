@@ -6,6 +6,7 @@ use System\Interfaces\IRequest;
 use System\Interfaces\IViewModel;
 use System\Providers\SessionProvider;
 use System\Helpers\HTTPHelper;
+use System\Helpers\FileHelper;
 use System\Helpers\DataCleanerHelper;
 use System\Exceptions\RespondException;
 use System\Models\HttpRequestModel;
@@ -65,7 +66,7 @@ class Controller implements IController
         if (! empty($name)) {
             try {
                 if (is_null($this->view)) {
-                    $this->view = View::create($this, $name, $model, $bag);
+                    $this->view = View::create($this, $name, 'view', $model, $bag);
                 } else {
                     $this->view->appendView($name, $model, $bag);
                 }
@@ -105,7 +106,6 @@ class Controller implements IController
      */
     public static function respond(int $code, string $message = null, IRequest $request = null, Exception $exception = null)
     {
-        ob_clean();
         $responses = \Launcher::Responses();
 
         if (! is_null($request)) {
@@ -133,7 +133,7 @@ class Controller implements IController
                 $viewModel->feedback(DataCleanerHelper::cleanValue($message));
             }
 
-            if (config('CLOSURES.RESOURCE')("responses/{$code}.php"))
+            if (FileHelper::findResource("responses/{$code}.php") !== false)
             {
                 $file = $code;
             }
@@ -141,8 +141,24 @@ class Controller implements IController
             {
                 $file = 'index';
             }
+            \ob_clean();
             try {
-                View::createResponse($respond, $file, $viewModel)->render();
+                $view = View::create($respond, $file, 'response', $viewModel);
+                if (! is_null($view))
+                {
+                    $view->render();
+                }
+                else
+                {
+                    if (config('PERMISSIONS.DEBUG'))
+                    {
+                        echo "({$code}) : ". $exception->getMessage();
+                    }
+                    else
+                    {
+                        echo 'Something went wrong';
+                    }
+                }
             } catch (Exception $e) {
                 if (config('PERMISSIONS.DEBUG'))
                 {

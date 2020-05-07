@@ -487,4 +487,59 @@ final class ArrayHelper
             return $array;
         }
     }
+    /**
+     * Set array value at key
+     * 
+     * @param   array       $array              array
+     * @param   string      $key                key name within array
+     * @param   bool        $value              value of the key that will be set
+     * 
+     * @return  bool     return true when value is set
+     */
+    public static function setKey(array &$array, string $key, $value)
+    {
+        if (is_array($array)) {
+            if (isset($array[$key])) {
+                if (is_array($array[$key])) {
+                    if (is_array($value)) {
+                        $array[$key] = array_merge($array[$key], $value); // merge values
+                    } else {
+                        // $array[$key] = $value; // Set value | No push
+                        array_push($array[$key], $value); // Push value
+                    }
+                } else {
+                    $array[$key] = $value; // Set value
+                }
+            } else {
+                $array[$key] = $value; // Add value
+            }
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Merge array changes recursively
+     * 
+     * @param   array      $array               array
+     * @param   array      $changes             new changes that will be merge with the array
+     * 
+     * @return  array     return new merged array
+     */
+    public static function mergeRecursively(array $array, array $changes)
+    {
+        if (is_array($changes) && ! empty($changes)) {
+            foreach ($changes as $key => $value) {
+                if (isset($array[$key])) {
+                    if (is_array($array[$key]) && is_array($value)) {
+                        self::setKey($array, $key, self::mergeRecursively($array[$key], $value));
+                    } else {
+                        self::setKey($array, $key, $value);
+                    }
+                } else {
+                    self::setKey($array, $key, $value);
+                }
+            }
+        }
+        return $array;
+    }    
 }

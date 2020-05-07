@@ -192,13 +192,13 @@ final class EnvironmentProvider
      * 
      * @return  array     return new merged array
      */
-    private function mergeRecursive(array $configs, array $changes)
+    private function mergeRecursively(array $configs, array $changes)
     {
         if (is_array($changes) && ! empty($changes)) {
             foreach ($changes as $key => $value) {
                 if (isset($configs[$key])) {
                     if (is_array($configs[$key]) && is_array($value)) {
-                        $this->setKey($configs, $key, $this->mergeRecursive($configs[$key], $value));
+                        $this->setKey($configs, $key, $this->mergeRecursively($configs[$key], $value));
                     } else {
                         $this->setKey($configs, $key, $value);
                     }
@@ -219,7 +219,7 @@ final class EnvironmentProvider
     public function add(array $configs)
     {
         if (! empty($configs)) {
-            $this->configs = $this->mergeRecursive($this->configs, $configs);
+            $this->configs = $this->mergeRecursively($this->configs, $configs);
             return true;
         }
         return false;
@@ -259,7 +259,7 @@ final class EnvironmentProvider
      * 
      * @param   string        $name              name of configuration file with extension omit
      * 
-     * @return  array        return load configurations
+     * @return  array        return loaded configurations
      */
     public function loadConfig(string $name)
     {
@@ -285,11 +285,22 @@ final class EnvironmentProvider
      * 
      * @param   string        $name              name of configuration file with extension omit
      * 
-     * @return  array        return load configurations
+     * @return  array        return loaded configurations
      */
     public function loadEnvironment(string $name)
     {
         return $this->loadConfig('environments/' . $name);
+    }
+    /**
+     * Load secrets from file within secret Folder
+     * 
+     * @param   string        $name              name of secret file with extension omit
+     * 
+     * @return  array        return loaded secrets
+     */
+    public function loadSecrets($name, string $key = null, $default = false)
+    {
+        return \System\Helpers\FileHelper::loadSecrets($name, $key, $default);
     }
     /**
      * DNS

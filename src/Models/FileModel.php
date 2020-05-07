@@ -105,7 +105,7 @@ class FileModel
      */
     public function read()
     {
-        return FileHelper::readFile($this->path(), $this->type());
+        return FileHelper::readFile($this->subPath(), $this->type());
     }
     /**
      * Print file

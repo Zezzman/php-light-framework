@@ -73,6 +73,11 @@ final class QueryHelper
         }
         return $message;
     }
+    /**
+     * $codes, $subject, $defaults, $list, $listLength, $allowEmpty
+     * 
+     * error - returns empty string
+     */
     public static function scanCodes($codes, string $subject, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false)
     {
         if (is_string($codes) || is_numeric($codes)) {
@@ -95,17 +100,47 @@ final class QueryHelper
                 $item = $defaults[$key] ?? null;
                 if (is_string($item) && ! empty($item)
                 || is_numeric($item)) {
+                    $counter++;
                     return $item;
                 }
             }
         };
         
         if ($list) {
-            $message = self::mapCodesList($codes, $subject, $pattern, $callback, $listLength, $allowEmpty, $counter);
+            $list = '';
+            $listSize = 0;
+            $commands = $codes;
+            $commandCount = count($commands);
+            $keys = array_keys($commands);
+            for ($i = 0; $i < $commandCount; $i++) {
+                if ($listLength > 0 && $listLength <= $listSize 
+                || $listLength < 0 && ($commandCount + $listLength) <= $listSize) {
+                    break;
+                }
+                $key = $keys[$i];
+                $codes = (is_object($commands[$key]))? (array) $commands[$key]: $commands[$key];
+                if (is_array($codes)) {
+                    $codes['KEY'] = $key;
+                } else {
+                    if (is_string($codes) || is_numeric($codes)) {
+                        $codes = [
+                            'KEY' => $key,
+                            'VALUE' => $codes
+                        ];
+                    }
+                }
+                $counter = 0;
+                $listItem = preg_replace_callback($pattern, $callback, $subject);
+                if ($allowEmpty === true || $counter !== 0) {
+                    $list .= $listItem;
+                    $listSize++;
+                }
+            }
+            $message = $list;
         } else {
             $counter = 0;
             $message = preg_replace_callback($pattern, $callback, $subject);
-            if ($allowEmpty === true || $counter === 0) {
+            if ($allowEmpty === false && $counter === 0) {
                 $message = '';
             }
         }
@@ -133,54 +168,48 @@ final class QueryHelper
                 $item = ArrayHelper::deepSearch($defaults, $key, '.');
                 if (is_string($item) && ! empty($item)
                 || is_numeric($item)) {
+                    $counter++;
                     return $item;
                 }
             }
         };
         
         if ($list) {
-            $message = self::mapCodesList($codes, $subject, $pattern, $callback, $listLength, $allowEmpty, $counter);
-        } else {
-            $counter = 0;
-            $message = preg_replace_callback($pattern, $callback, $subject);
-            if ($allowEmpty === true || $counter === 0) {
-                $message = '';
-            }
-        }
-        return $message;
-    }
-    public static function mapCodesList(array &$codes, string $subject, string $pattern, Closure $callback, int $listLength = 0, bool $allowEmpty = false, int &$counter = 0)
-    {
-        $mapCodes = function () use ($pattern, $callback, $subject, $allowEmpty, &$counter) {
-            $message = preg_replace_callback($pattern, $callback, $subject);
-            if ($allowEmpty === true || $counter !== 0) {
-                return $message;
-            }
-        };
-        
-        $message = '';
-        $commands = $codes;
-        $commandCount = count($commands);
-        $keys = array_keys($commands);
-        for ($i = 0; $i < $commandCount; $i++) {
-            if ($listLength == 0 || $listLength > 0 && $listLength > $i 
-            || $listLength < 0 && ($commandCount + $listLength) == $i) {
+            $list = '';
+            $listSize = 0;
+            $commands = $codes;
+            $commandCount = count($commands);
+            $keys = array_keys($commands);
+            for ($i = 0; $i < $commandCount; $i++) {
+                if ($listLength > 0 && $listLength <= $listSize 
+                || $listLength < 0 && ($commandCount + $listLength) <= $listSize) {
+                    break;
+                }
                 $key = $keys[$i];
                 $codes = (is_object($commands[$key]))? (array) $commands[$key]: $commands[$key];
                 if (is_array($codes)) {
                     $codes['KEY'] = $key;
-                    $counter = 0;
-                    $message .= $mapCodes();
                 } else {
                     if (is_string($codes) || is_numeric($codes)) {
                         $codes = [
                             'KEY' => $key,
                             'VALUE' => $codes
                         ];
-                        $counter = 0;
-                        $message .= $mapCodes();
                     }
                 }
+                $counter = 0;
+                $listItem = preg_replace_callback($pattern, $callback, $subject);
+                if ($allowEmpty === true || $counter !== 0) {
+                    $list .= $listItem;
+                    $listSize++;
+                }
+            }
+            $message = $list;
+        } else {
+            $counter = 0;
+            $message = preg_replace_callback($pattern, $callback, $subject);
+            if ($allowEmpty === false && $counter === 0) {
+                $message = '';
             }
         }
         return $message;

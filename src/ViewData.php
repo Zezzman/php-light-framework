@@ -3,7 +3,7 @@ namespace System;
 
 use System\Interfaces\IView;
 use System\Interfaces\IViewModel;
-use System\Helpers\DataCleanerHelper;
+use System\Helpers\FileHelper;
 /**
  * 
  */
@@ -11,6 +11,7 @@ class ViewData implements IView
 {
     public $name = null;
     public $path = null;
+    public $file = null;
     public $model = null;
     public $bag = [];
 
@@ -21,6 +22,7 @@ class ViewData implements IView
     {
         $this->name = $name;
         $this->path = $path;
+        $this->file = FileHelper::secureRequiredPath($path);
         $this->model = $model;
         $this->bag = $bag;
     }
@@ -29,7 +31,7 @@ class ViewData implements IView
      */
     public function valid()
     {
-        if (! is_null($this->name) && file_exists($this->path)) {
+        if (! is_null($this->name) && ! empty($this->file)) {
             return true;
         } else {
             return false;
