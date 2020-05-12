@@ -1,6 +1,7 @@
 <?php
 namespace System\Models\Requests;
 
+use System\Interfaces\IViewModel;
 use System\Models\RequestModel;
 use System\Providers\EnvironmentProvider;
 use System\Providers\AuthProvider;
@@ -16,6 +17,7 @@ class HttpRequestModel extends RequestModel
     public $method = '';
     public $redirect = null;
     public $view = null;
+    public $model = null;
     public $settings = [];
     public $onMatching = [];
     public $onMatched = [];
@@ -276,14 +278,15 @@ class HttpRequestModel extends RequestModel
     /**
      * Set View
      */
-    public function setView(string $view)
+    public function setView(string $view, IViewModel $model = null)
     {
         if ($this->valid() && ! empty($view))
         {
             $request = $this;
-            $this->onMatching[] = function () use ($request, $view)
+            $this->onMatching[] = function () use ($request, $view, $model)
             {
                 $request->view = $view;
+                $request->model = $model;
             };
         }
         return $this;

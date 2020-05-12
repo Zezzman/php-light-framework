@@ -45,7 +45,7 @@ final class Launcher
             $instance->environment->setup();
             
             // Set debug output
-            if (config('PERMISSIONS.DEBUG')) {
+            if (config('SETTINGS.DEBUG')) {
                 error_reporting(E_ALL);
                 ini_set('display_errors', E_ALL);
             }
@@ -266,7 +266,7 @@ final class Launcher
     private function executeView(IRequest $request, $view, array $params)
     {
         $class = new Controller($request);
-        $method = $class->view($view, null, $params);
+        $method = $class->view($view, ($request->model ?? null), $params);
         if ($method instanceof \System\View
         && ! $method->hasRendered()) {
             $method->render();

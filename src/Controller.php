@@ -34,7 +34,7 @@ class Controller implements IController
      */
     public function __construct(IRequest $request = null)
     {
-        if (config('PERMISSIONS.NO_CACHE', false)) {
+        if (config('SETTINGS.NO_CACHE', false)) {
             header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
             header("Cache-Control: post-check=0, pre-check=0", false);
             header("Pragma: no-cache");
@@ -150,7 +150,7 @@ class Controller implements IController
                 }
                 else
                 {
-                    if (config('PERMISSIONS.DEBUG'))
+                    if (config('SETTINGS.DEBUG'))
                     {
                         echo "({$code}) : ". $exception->getMessage();
                     }
@@ -160,7 +160,7 @@ class Controller implements IController
                     }
                 }
             } catch (Exception $e) {
-                if (config('PERMISSIONS.DEBUG'))
+                if (config('SETTINGS.DEBUG'))
                 {
                     echo "({$code}) : ". $e->getMessage();
                 }

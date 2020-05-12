@@ -22,6 +22,7 @@ class ViewModel implements IViewModel
     function setTitle(string $title)
     {
         $this->title = $title;
+        return $this;
     }
 
     public function messages($types = 0, string $name = '', string $style = "{message}<br>", int $length = 0)

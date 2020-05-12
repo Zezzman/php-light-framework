@@ -90,7 +90,7 @@ abstract class APIController implements IController
                 $message = DataCleanerHelper::cleanArray((array) $message);
                 $body['message'] = $message;
             }
-            if (! is_null($exception) && config('PERMISSIONS.DEBUG')) {
+            if (! is_null($exception) && config('SETTINGS.DEBUG')) {
                 $body['request'] = $request;
                 $body['Exception'] = $exception;
                 if ($body['message'] === '') {

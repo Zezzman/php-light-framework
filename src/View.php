@@ -7,6 +7,7 @@ use System\Interfaces\IViewModel;
 use System\Factories\ViewFactory;
 use System\Helpers\HTTPHelper;
 use System\Helpers\FileHelper;
+use System\Helpers\QueryHelper;
 use System\Helpers\ArrayHelper;
 use Exception;
 /**
@@ -23,6 +24,8 @@ class View
     private $currentView = null;
     private $content = '';
     private $append = '';
+
+    private $cacheCards = [];
 
     /**
      * 
@@ -57,6 +60,50 @@ class View
     public function viewData(string $name)
     {
         return $this->viewData[$name] ?? null;
+    }
+    /**
+     * 
+     */
+    public function bag($changes = null, bool $set = true)
+    {
+        $bag = [];
+        if (! is_null($changes)
+        && ! empty($changes))
+        {
+            $changes = (array) $changes;
+            if (! is_null($this->currentView))
+            {
+                if (! is_null($this->currentView->bag)) {
+                    $bag = ArrayHelper::mergeRecursively($this->currentView->bag, $changes); // add additional items to view bag
+                }
+                else
+                {
+                    $bag = $changes;
+                }
+                if ($set == true)
+                {
+                    $this->currentView->bag = $bag;
+                }
+            }
+            else
+            {
+                $bag = $changes;
+            }
+        }
+        else
+        {
+            if (! is_null($this->currentView)
+            && ! is_null($this->currentView->bag))
+            {
+                $bag = $this->currentView->bag;
+            }
+            else
+            {
+                $bag = [];
+            }
+        }
+        
+        return $bag;
     }
     /**
      * 
@@ -112,22 +159,8 @@ class View
         $layout = $this->layout ?? null;
         $viewData = $this->currentView ?? null;
         $model = $viewData->model ?? null;
-        if (is_null($bag)) {
-            if (! is_null($viewData)
-            && ! is_null($viewData->bag)) {
-                $bag = $this->currentView->bag; // view bag
-            } else {
-                $bag = [];
-            }
-        }
-        else
-        {
-            if (! is_null($viewData)
-            && ! is_null($viewData->bag)) {
-                $bag = ArrayHelper::mergeRecursively($this->currentView->bag, $bag); // add additional items to view bag
-            }
-        }
-
+        $bag = $this->bag($bag, false);
+        
         $path = FileHelper::secureRequiredPath($path);
         if (! empty($path)) {
             if (file_exists($path)) {
@@ -141,7 +174,11 @@ class View
      */
     public function card(string $name, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false)
     {
-        echo FileHelper::loadFile('cards/' . $name, $codes, $defaults, $list, $listLength, $allowEmpty);
+        if (! isset($this->cacheCards[$name]))
+        {
+            $this->cacheCards[$name] = (string) FileHelper::loadFile('cards/' . $name);
+        }
+        echo QueryHelper::scanCodes($this->bag($codes, false), $this->cacheCards[$name], $defaults, $list, $listLength, $allowEmpty);
     }
     /**
      * 
@@ -163,6 +200,7 @@ class View
 
         $hasView = false;
         $body = '';
+        $this->bag(config('APP', null));
         // buffer view
         ob_start();
         foreach ($this->viewData as $view) {
@@ -192,6 +230,7 @@ class View
                 throw new Exception('Loaded Empty Layout');
             }
         }
+        $this->cacheCards = [];
     }
     /**
      * 

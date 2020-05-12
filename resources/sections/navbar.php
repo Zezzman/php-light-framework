@@ -43,15 +43,24 @@ if (isset($bag['links'])) {
             }
         }
     }
-    if ($left != '')
+    if (! empty($left))
     {
         $left = '<ul class="navbar-nav mr-auto">'. $left . '</ul>';
     }
-    if ($right != '')
+    if (! empty($right))
     {
         $right = '<ul class="navbar-nav ml-auto">' . $right . '</ul>';
     }
-    $entries = '<div class="collapse navbar-collapse" id="navbar-collapse-div">' . $left . $right . '</div>';
-    $this->card(config('LAYOUT.NAV'), ['nav-entries' => $entries]);
+    $brand = '';
+    $entries = '';
+    if (! empty($navBrand = ($bag['BRAND'] ?? false)))
+    {
+        $brand = '<a class="navbar-brand" href="' . $navBrand['link'] . '">' . $navBrand['name'] . '</a>';
+    }
+    if (! empty($left) || ! empty($right))
+    {
+        $entries = '<div class="collapse navbar-collapse" id="navbar-collapse-div">' . $left . $right . '</div>';
+    }
+    $this->card(config('LAYOUT.NAV'), ['brand' => $brand, 'entries' => $entries]);
 }
 ?>

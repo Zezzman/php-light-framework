@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<?php $this->header('header', config('APP')); ?>
+<?php $this->header('header'); ?>
 <?php
 if (! empty($style = \System\Helpers\FileHelper::loadFile('../public/assets/css/' . basename(__FILE__, '.php') . '.css')))
 {

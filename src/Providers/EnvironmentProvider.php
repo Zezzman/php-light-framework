@@ -71,9 +71,9 @@ final class EnvironmentProvider
     private function getConfig()
     {
         $this->addConfig([
-            'app', 'permissions', 'namespaces',
-            'auth', 'database', 'paths',
-            'links', 'layout', 'collection'
+            'settings', 'app', 'permissions',
+            'namespaces', 'auth', 'database',
+            'paths', 'links', 'layout', 'collection'
         ]);
     }
     /**
