@@ -1,22 +1,42 @@
-.grid
-{
+@mixin create-grid($col-size, $row-size: null) {
     display: grid;
-
-    .grid-row {
-        display: grid;
-        grid-template: "grid-column";
+    grid-template-columns: repeat($col-size, 1fr);
+    @if $row-size != null {
+        grid-auto-rows: $row-size;
     }
-    .grid-column
+    
+    .grid-cell
     {
-        display: grid;
-        grid-area: grid-column;
-        grid-column: auto;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        $grid-sizes: (
+            "1": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            "6": 6,
+        );
+        @each $breakpoint in map-keys($grid-breakpoints)
+        {
+            @include media-breakpoint-up($breakpoint, $grid-breakpoints)
+            {
+                $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+                @each $span, $value in $grid-sizes
+                {
+                    &.r#{$infix}-#{$span}
+                    {
+                        grid-row: span #{$value};
+                    }
+                    &.c#{$infix}-#{$span}
+                    {
+                        grid-column: span #{$value};
+                    }
+                }
+            }
+        }
     }
-}
-.grid-2
-{
-    display: grid;
-    grid-template-columns: auto auto;
 }
 
 .form-grid {

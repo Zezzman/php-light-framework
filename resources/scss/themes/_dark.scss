@@ -17,3 +17,49 @@ $section-alt-bg: $gray-400;
 
 /* Borders */
 $border-color: $white;
+
+/* Classes */
+.overlay-color
+{
+    color: $overlay-color;
+}
+.overlay-bg
+{
+    background-color: $overlay-bg;
+}
+.body-color
+{
+    color: $body-color;
+}
+.body-bg
+{
+    background-color: $body-bg;
+}
+.title-color
+{
+    color: $title-color;
+}
+.title-bg
+{
+    background-color: $title-bg;
+}
+.section-color
+{
+    color: $section-color;
+}
+.section-bg
+{
+    background-color: $section-bg;
+}
+.section-alt-color
+{
+    color: $section-alt-color;
+}
+.section-alt-bg
+{
+    background-color: $section-alt-bg;
+}
+.border-color
+{
+    color: $border-color;
+}

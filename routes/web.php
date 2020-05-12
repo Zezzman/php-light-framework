@@ -3,5 +3,5 @@
 /**
  *  Documentation
  */
-$this->get('/', 'Home@Document');
+$this->get('/', 'Home@Index');
 $this->get('document/', 'Home@Document');

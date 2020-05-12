@@ -12,28 +12,6 @@ hr
     border-color: $border-color;
 }
 
-/* Colors */
-.color-green
-{
-    color: $green;
-}
-.color-light-green
-{
-    color: $light-green;
-}
-.color-pale-green
-{
-    color: $pale-green;
-}
-.bg-light-green
-{
-    background-color: $light-green;
-}
-.bg-pale-green
-{
-    background-color: $pale-green;
-}
-
 /* heights & widths */
 .h-min
 {
@@ -125,62 +103,6 @@ hr
     flex-basis: content;
 }
 
-/* navbar */
-.navbar {
-    @include media-breakpoint-up(md) { 
-        height: 2rem;
-        .nav-link
-        {
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-    }
-}
-
-/* Overlay */
-.img-overlay
-{   
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    transition: .5s ease;
-    opacity: 0;
-    padding: 0.5rem;
-    color: white;
-    box-shadow: inset 0 4px 10px 0px rgba(0, 0, 0, 0.3);
-    background-color: $overlay-bg;
-
-    &-fill
-    {   
-        top: 0;
-    }
-    &-gray
-    {   
-        box-shadow: inset 0px 0px 20px 0px rgb(200, 200, 200);
-        background-color: rgba(200, 200, 200, 0.1);
-    }
-    &-clear
-    {   
-        background-color: #00000000;
-        box-shadow: none;
-    }
-    &:hover
-    {
-        opacity: 1;
-    }
-    &-invert
-    {
-        @extend .img-overlay;
-        opacity: 1;
-
-        &:hover
-        {
-            opacity: 0;
-        }
-    }
-}
 /* Tooltip */
 
 
@@ -243,6 +165,12 @@ a.link:focus
 {
     color: $section-alt-color;
     background-color: $section-alt-bg;
+}
+
+/* Text */
+.text-underline
+{
+    text-decoration: underline;
 }
 
 /* Errors */
