@@ -1,4 +1,5 @@
 <?php
+use System\Interfaces\IController;
 use System\Controller;
 use System\APIController;
 use System\CLIController;
@@ -45,7 +46,7 @@ final class Launcher
             $instance->environment->setup();
             
             // Set debug output
-            if (config('SETTINGS.DEBUG')) {
+            if (config('SETTINGS.DEBUG', false)) {
                 error_reporting(E_ALL);
                 ini_set('display_errors', E_ALL);
             }
@@ -236,25 +237,22 @@ final class Launcher
         string $controllerPath, string $action, array $params)
     {
         if (class_exists($controllerPath, true)) {
-            $class = new $controllerPath($request);
-            if (method_exists($class, $action)) {
-                $params = array_values($params);
-                if (is_array($params) && count($params) > 0) {
-                    $method = $class->$action(...$params);
-                    if ($method instanceof \System\View
-                    && ! $method->hasRendered()) {
-                        $method->render();
+            $controller = new $controllerPath($request);
+            if ($controller instanceof IController) {
+                if (method_exists($controller, $action)) {
+                    $params = array_values($params);
+                    if (is_array($params) && count($params) > 0) {
+                        $controller->$action(...$params);
+                    } else {
+                        $controller->$action();
                     }
+                    $controller->render();
+                    return $controller;
                 } else {
-                    $method = $class->$action();
-                    if ($method instanceof \System\View
-                    && ! $method->hasRendered()) {
-                        $method->render();
-                    }
+                    throw new Exception("Error finding Controller Method: $controllerPath::$action()");
                 }
-                return $class;
             } else {
-                throw new Exception("Error finding Controller Method: $controllerPath::$action()");
+                throw new Exception("Controller does not implement IController: $controllerPath");
             }
         } else {
             throw new Exception("Error finding Controller: $controllerPath");
@@ -265,13 +263,10 @@ final class Launcher
      */
     private function executeView(IRequest $request, $view, array $params)
     {
-        $class = new Controller($request);
-        $method = $class->view($view, ($request->model ?? null), $params);
-        if ($method instanceof \System\View
-        && ! $method->hasRendered()) {
-            $method->render();
-        }
-        return $class;
+        $controller = new Controller($request);
+        $controller->view($view, ($request->model ?? null), $params);
+        $controller->render();
+        return $controller;
     }
     public static function Responses()
     {

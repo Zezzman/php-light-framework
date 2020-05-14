@@ -66,9 +66,9 @@ class Controller implements IController
         if (! empty($name)) {
             try {
                 if (is_null($this->view)) {
-                    $this->view = View::create($this, $name, 'view', $model, $bag);
+                    $this->view = View::create($this, $name, 'view', $model, $bag, true);
                 } else {
-                    $this->view->appendView($name, $model, $bag);
+                    $this->view->appendView($name, 'view', $model, $bag);
                 }
             } catch (RespondException $e) {
                 $this->error($e->respondCode(), $e);
@@ -79,6 +79,21 @@ class Controller implements IController
             }
         }
         return $this->view;
+    }
+    /**
+     * Render Controller Views
+     */
+    public function render()
+    {
+        if ($this->view instanceof \System\View)
+        {
+            if (($content = $this->view->render()) !== false)
+            {
+                echo $content;
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * Create Error View
@@ -141,16 +156,16 @@ class Controller implements IController
             {
                 $file = 'index';
             }
-            \ob_clean();
             try {
-                $view = View::create($respond, $file, 'response', $viewModel);
-                if (! is_null($view))
+                $view = View::create($respond, $file, 'response', $viewModel, [], true);
+                if (! is_null($view)
+                && ($content = $view->render()) !== false)
                 {
-                    $view->render();
+                    echo $content;
                 }
                 else
                 {
-                    if (config('SETTINGS.DEBUG'))
+                    if (config('SETTINGS.DEBUG', false))
                     {
                         echo "({$code}) : ". $exception->getMessage();
                     }
@@ -160,7 +175,7 @@ class Controller implements IController
                     }
                 }
             } catch (Exception $e) {
-                if (config('SETTINGS.DEBUG'))
+                if (config('SETTINGS.DEBUG', false))
                 {
                     echo "({$code}) : ". $e->getMessage();
                 }

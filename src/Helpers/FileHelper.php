@@ -12,9 +12,9 @@ final class FileHelper
     /**
      * Loads content of file and scans for codes
      */
-    public static function loadFile(string $path, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false)
+    public static function loadFile(string $path, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false, bool $required = true)
     {
-        $path = self::secureRequiredPath($path);
+        $path = ($required)? self::secureRequiredPath($path): self::securePath($path);
         if (file_exists($path) && is_file($path)) {
             if (! is_null($codes)) {
                 $content = file_get_contents($path);
@@ -130,12 +130,14 @@ final class FileHelper
                         $script['charset'] = 'charset="' . $script['charset'] . '"';
                     }
                     if (isset($script['var']) && ! empty($script['var'])) {
-                        $script['code'] .= QueryHelper::scanCodes($script['var'], 'var {KEY} = {VALUE};', [], true) . "\n";
+                        $script['code'] = QueryHelper::scanCodes($script['var'], 'var {KEY} = {VALUE};', [], true) . "\n" + $script['code'];
                     }
                     if (isset($script['path']) && ! empty($script['path'])) {
-                        $file = self::loadFile($script['path']);
-                        if (! empty($file)) {
-                            $script['code'] .= $file;
+                        if (($file = self::loadFile($script['path'], null, [], false, 0, false, false)) !== false)
+                        {
+                            if (! empty($file)) {
+                                $script['code'] .= $file;
+                            }
                         }
                     }
                     // Create html

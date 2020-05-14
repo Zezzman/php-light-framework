@@ -14,6 +14,8 @@ class ViewData implements IView
     public $file = null;
     public $model = null;
     public $bag = [];
+    public $prepend = '';
+    public $append = '';
 
     /**
      * 
@@ -36,5 +38,19 @@ class ViewData implements IView
         } else {
             return false;
         }
+    }
+    /**
+     * Prepend Content Before Views and Layout
+     */
+    public function prepend(string $content)
+    {
+        $this->prepend .= $content;
+    }
+    /**
+     * Append Content After View
+     */
+    public function append(string $content)
+    {
+        $this->append .= $content;
     }
 }

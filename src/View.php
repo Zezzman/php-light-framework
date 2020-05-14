@@ -22,6 +22,7 @@ class View
     private $viewData = [];
     private $layout = null;
     private $currentView = null;
+    private $prepend = '';
     private $content = '';
     private $append = '';
 
@@ -37,22 +38,19 @@ class View
     /**
      * 
      */
-    public static function create(IController $controller, string $name, string $type, IViewModel $model = null, array $bag = [])
+    public static function create(IController $controller, string $name, string $type, IViewModel $model = null, array $bag = [], bool $includeLayout = false)
     {
         $view = new self($controller);
         $viewData = ViewFactory::createView($name, $type, $model, $bag);
         if ($viewData->valid()) {
             $view->currentView = $viewData;
             $view->viewData[$name] = $viewData;
-            if (config('LAYOUT.DEFAULT', false) !== false) {
+            if ($includeLayout && config('LAYOUT.DEFAULT', false) !== false) {
                 $view->layout(config('LAYOUT.DEFAULT'));
             }
-        }
-        if (! is_null($view->currentView) && $view->currentView->valid()) {
             return $view;
-        } else {
-            return null;
         }
+        return null;
     }
     /**
      * 
@@ -64,7 +62,7 @@ class View
     /**
      * 
      */
-    public function bag($changes = null, bool $set = true)
+    public function bag($changes = null, bool $save = true)
     {
         $bag = [];
         if (! is_null($changes)
@@ -80,7 +78,7 @@ class View
                 {
                     $bag = $changes;
                 }
-                if ($set == true)
+                if ($save == true)
                 {
                     $this->currentView->bag = $bag;
                 }
@@ -121,7 +119,14 @@ class View
         return false;
     }
     /**
-     * 
+     * Prepend Content Before Views and Layout
+     */
+    public function prepend(string $content)
+    {
+        $this->prepend .= $content;
+    }
+    /**
+     * Append Content After Views and Layout
      */
     public function append(string $content)
     {
@@ -132,22 +137,31 @@ class View
      */
     public function layout(string $name = null)
     {
-        $this->layout = 'layouts/' . $name  . '.php';
+        $this->layout = $name;
     }
     private function header(string $name, array $bag = null)
     {
-        return $this->loadFile('headers/' . $name  . '.php', $bag);
+        if (($content = $this->loadFile('headers/' . $name  . '.php', $bag)) !== false)
+        {
+            echo $content;
+        }
     }
     private function footer(string $name, array $bag = null)
     {
-        return $this->loadFile('footers/' . $name  . '.php', $bag);
+        if (($content = $this->loadFile('footers/' . $name  . '.php', $bag)) !== false)
+        {
+            echo $content;
+        }
     }
     /**
      * 
      */
     private function section(string $name, array $bag = null)
     {
-        return $this->loadFile('sections/' . $name  . '.php', $bag);
+        if (($content = $this->loadFile('sections/' . $name  . '.php', $bag)) !== false)
+        {
+            echo $content;
+        }
     }
     /**
      * 
@@ -156,7 +170,6 @@ class View
     {
         // file local pre-defined variables
         $controller = $this->controller ?? null;
-        $layout = $this->layout ?? null;
         $viewData = $this->currentView ?? null;
         $model = $viewData->model ?? null;
         $bag = $this->bag($bag, false);
@@ -164,7 +177,16 @@ class View
         $path = FileHelper::secureRequiredPath($path);
         if (! empty($path)) {
             if (file_exists($path)) {
-                return include($path);
+                ob_start();
+                if ((include($path)) !== false)
+                {
+                    $content = ob_get_clean();
+                    return $content;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
         return false;
@@ -200,37 +222,39 @@ class View
 
         $hasView = false;
         $body = '';
-        $this->bag(config('APP', null));
-        // buffer view
-        ob_start();
+        // render views
         foreach ($this->viewData as $view) {
-            if ($this->loadFile($view->path)) {
-                $body .= ob_get_clean();
+            $this->currentView = $view;
+            $this->bag(config('APP', null));
+            if (($viewContent = $this->loadFile($view->path)) !== false) {
+                $body .= $view->prepend . $viewContent . $view->append;
                 $hasView = true;
-            } else {
-                ob_clean();
             }
         }
         // buffer layout
-        if (is_null($this->layout) || ! $hasView) {
+        if (empty($this->layout) || ! $hasView) {
             $this->hasRendered = true;
             // render view
-            echo $body . $this->append;
-            ob_flush();
+            $this->content = $this->prepend . $body . $this->append;
         } else {
             // include body within layout
             $this->content = $body;
-            $layout = $this->loadFile($this->layout ?? '');
-            $content = ob_get_clean();
-            if ($layout) {
+            $this->bag(['scripts' => [ ($this->layout) => ['path' => '../public/assets/javascript/' . $this->layout . '.js']]]);
+            if (($layout = $this->loadFile('layouts/' . $this->layout . '.php', [
+                'style' => $style = FileHelper::loadFile('../public/assets/css/' . $this->layout . '.css')
+            ])) !== false)
+            {
                 $this->hasRendered = true;
                 // render view
-                echo $content . $this->append;
-            } else {
+                $this->content = $this->prepend . $layout . $this->append;
+            }
+            else
+            {
                 throw new Exception('Loaded Empty Layout');
             }
         }
         $this->cacheCards = [];
+        return $this->content;
     }
     /**
      * 

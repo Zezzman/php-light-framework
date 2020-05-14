@@ -56,7 +56,7 @@ class CLIController implements IController
                 $message = DataCleanerHelper::cleanArray((array) $message);
                 $body['message'] = $message;
             }
-            if (! is_null($exception) && config('SETTINGS.DEBUG')) {
+            if (! is_null($exception) && config('SETTINGS.DEBUG', false)) {
                 $body['request'] = $request;
                 $body['Exception'] = $exception;
                 if ($body['message'] === '') {

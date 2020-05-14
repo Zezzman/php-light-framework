@@ -24,7 +24,14 @@ final class RequestProvider
             if (file_exists($routeFile)) {
                 require($routeFile);
             } else {
-                throw new Exception('Route File Not Found: '. $routeFile);
+                if (config('SETTINGS.DEBUG', false))
+                {
+                    throw new Exception('Route File Not Found: '. $routeFile);
+                }
+                else
+                {
+                    exit('Something went wrong');
+                }
             }
         }
     }

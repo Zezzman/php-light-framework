@@ -3,9 +3,9 @@
 <head>
 <?php $this->header('header', config('APP')); ?>
 <?php
-if (! empty($style = \System\Helpers\FileHelper::loadFile('../public/assets/css/' . basename(__FILE__, '.php') . '.css')))
+if (isset($bag['style']) && is_string($bag['style']))
 {
-    echo "<style>$style</style>";
+    echo "<style>" . $bag['style'] . "</style>";
 }
 ?>
 </head>

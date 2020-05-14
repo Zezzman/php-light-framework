@@ -499,19 +499,26 @@ final class ArrayHelper
     public static function setKey(array &$array, string $key, $value)
     {
         if (is_array($array)) {
-            if (isset($array[$key])) {
-                if (is_array($array[$key])) {
-                    if (is_array($value)) {
-                        $array[$key] = array_merge($array[$key], $value); // merge values
+            if ($key !== '')
+            {
+                if (isset($array[$key])) {
+                    if (is_array($array[$key])) {
+                        if (is_array($value)) {
+                            $array[$key] = self::mergeRecursively($array[$key], $value, false); // merge values
+                        } else {
+                            // $array[$key] = $value; // Set value | No push
+                            array_push($array[$key], $value); // Push value
+                        }
                     } else {
-                        // $array[$key] = $value; // Set value | No push
-                        array_push($array[$key], $value); // Push value
+                        $array[$key] = $value; // Set value
                     }
                 } else {
                     $array[$key] = $value; // Set value
                 }
-            } else {
-                $array[$key] = $value; // Add value
+            }
+            else
+            {
+                $array[] = $value; // Add value
             }
             return true;
         }
@@ -525,13 +532,33 @@ final class ArrayHelper
      * 
      * @return  array     return new merged array
      */
-    public static function mergeRecursively(array $array, array $changes)
+    public static function mergeRecursively(array $array, array $changes, bool $append = true)
     {
         if (is_array($changes) && ! empty($changes)) {
             foreach ($changes as $key => $value) {
                 if (isset($array[$key])) {
                     if (is_array($array[$key]) && is_array($value)) {
-                        self::setKey($array, $key, self::mergeRecursively($array[$key], $value));
+                        $indexes = array_keys($value);
+                        $subArray = $array[$key];
+                        foreach ($indexes as $index)
+                        {
+                            if (isset($subArray[$index]))
+                            {
+                                if ($append)
+                                {
+                                    self::setKey($subArray, '', $value[$index]);
+                                }
+                                else
+                                {
+                                    self::setKey($subArray, $index, self::mergeRecursively($subArray[$index], $value[$index]));
+                                }
+                            }
+                            else
+                            {
+                                self::setKey($subArray, $index, $value[$index]);
+                            }
+                        }
+                        $array[$key] = $subArray;
                     } else {
                         self::setKey($array, $key, $value);
                     }

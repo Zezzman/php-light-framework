@@ -22,11 +22,11 @@ final class DataCleanerHelper
             $cleanData = trim($data);
             $cleanData = trim($cleanData, '/');
 
+            $cleanData = htmlspecialchars($cleanData);
             $cleanData = strip_tags($cleanData);
             if (get_magic_quotes_gpc()) {
                 $cleanData = stripslashes($cleanData);
             }
-            $cleanData = htmlspecialchars($cleanData);
         }
         return $cleanData;
     }
