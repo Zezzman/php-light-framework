@@ -1,16 +1,20 @@
-function RemoteAPI() {
-    var token = $('meta[name="token"]').attr('content');
-    var listeners = {};
-    var Call = function (uri, data, method, success, error) {
+var Remote = /** @class */ (function () {
+    function Remote(domain) {
+        this.token = $('meta[name="token"]').attr('content');
+        this.domain = domain;
+    }
+    Remote.prototype.call = function (uri, data, method, success, error, headers, dataType) {
+        if (method === void 0) { method = "GET"; }
         if (success === void 0) { success = null; }
         if (error === void 0) { error = null; }
+        if (headers === void 0) { headers = {}; }
+        if (dataType === void 0) { dataType = "json"; }
+        headers['token'] = this.token;
         $.ajax({
-            headers: {
-                'token': token,
-            },
-            url: remoteDomain + uri,
+            headers: headers,
+            url: this.domain + uri,
             type: method,
-            dataType: "json",
+            dataType: dataType,
             data: data,
             success: function (data, status, response) {
                 if (success)
@@ -24,7 +28,7 @@ function RemoteAPI() {
             }
         });
     };
-    var Listen = function (uri, data, method, interval, success, error, keepAlive, waitForResponse, threshold) {
+    Remote.prototype.listen = function (uri, data, method, interval, success, error, keepAlive, waitForResponse, threshold) {
         if (method === void 0) { method = "GET"; }
         if (interval === void 0) { interval = 5000; }
         if (success === void 0) { success = null; }
@@ -34,38 +38,38 @@ function RemoteAPI() {
         if (threshold === void 0) { threshold = 5; }
         var Action = function (fallback) {
             if (waitForResponse) {
-                listeners[uri] = true;
+                this.listeners[uri] = true;
             }
-            Call(uri, data, method, function (data, response, status) {
-                listeners[uri] = fallback;
+            this.call(uri, data, method, function (data, response, status) {
+                this.listeners[uri] = fallback;
                 if (success)
                     success(data, response, status);
             }, function (response) {
                 if (!keepAlive) {
-                    CloseListener(uri);
+                    this.closeListener(uri);
                 }
                 else {
-                    listeners[uri] = fallback;
+                    this.listeners[uri] = fallback;
                 }
                 if (error)
                     error(response);
             });
         };
         var thresholdCount = threshold;
-        if (listeners.hasOwnProperty(uri)) {
+        if (this.listeners.hasOwnProperty(uri)) {
             // console.log('Executing');
             Action(null);
-            listeners[uri] = Action;
+            this.listeners[uri] = Action;
         }
         else {
-            listeners[uri] = Action;
-            Wait(interval, function () {
-                if (listeners.hasOwnProperty(uri)
-                    && listeners[uri]) {
-                    if (listeners[uri] !== true) {
+            this.listeners[uri] = Action;
+            this.wait(interval, function () {
+                if (this.listeners.hasOwnProperty(uri)
+                    && this.listeners[uri]) {
+                    if (this.listeners[uri] !== true) {
                         // console.log('Responded');
                         thresholdCount = threshold;
-                        listeners[uri](Action);
+                        this.listeners[uri](Action);
                     }
                     else {
                         // console.log('Waiting');
@@ -76,7 +80,7 @@ function RemoteAPI() {
                             // console.log('Threshold Exceeded');
                             if (error)
                                 error(false);
-                            listeners[uri] = false;
+                            this.listeners[uri] = false;
                             return false;
                         }
                     }
@@ -88,16 +92,17 @@ function RemoteAPI() {
             }, true);
         }
     };
-    var CloseListener = function (uri) {
-        if (listeners.hasOwnProperty(uri)) {
-            listeners[uri] = false;
+    Remote.prototype.closeListener = function (uri) {
+        if (this.listeners.hasOwnProperty(uri)) {
+            this.listeners[uri] = false;
             return true;
         }
         else {
             return false;
         }
     };
-    var Wait = function (interval, fallback, startExecute) {
+    ;
+    Remote.prototype.wait = function (interval, fallback, startExecute) {
         if (startExecute === void 0) { startExecute = false; }
         if (startExecute) {
             if (fallback() === false) {
@@ -106,17 +111,19 @@ function RemoteAPI() {
         }
         setTimeout(function () {
             if (fallback() !== false) {
-                Wait(interval, fallback, false);
+                this.wait(interval, fallback, false);
             }
             else {
                 return false;
             }
         }, interval);
     };
-    return {
-        Call: Call,
-        Listen: Listen,
-        CloseListener: CloseListener,
-        listeners: listeners,
+    ;
+    Remote.prototype.getListeners = function () {
+        return this.listeners;
     };
-}
+    ;
+    return Remote;
+}());
+export { Remote };
+export var remote = new Remote(remoteDomain);
