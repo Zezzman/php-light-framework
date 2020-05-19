@@ -17,60 +17,49 @@ hr
 {
     height: min-content;
 }
-
-/* view port */
-.vh-100
+.w-min
 {
-    height: 100vh;
-}
-.vh-90
-{
-    height: 90vh;
-}
-.vh-85
-{
-    height: 85vh;
-}
-.vh-75
-{
-    height: 75vh;
-}
-.vh-50
-{
-    height: 50vh;
-}
-.vh-25
-{
-    height: 25vh;
-}
-.vh-10
-{
-    height: 10vh;
+    width: min-content;
 }
 
-.vw-100
+$view-sizes: (
+    '100': 100,
+    '90': 90,
+    '85': 85,
+    '80': 80,
+    '75': 75,
+    '60': 60,
+    '50': 50,
+    '45': 45,
+    '35': 35,
+    '25': 25,
+    '10': 10
+);
+@each $breakpoint in map-keys($grid-breakpoints)
 {
-    width: 100vw;
-}
-.vw-90
-{
-    width: 90vw;
-}
-.vw-75
-{
-    width: 75vw;
-}
-.vw-50
-{
-    width: 50vw;
-}
-.vw-25
-{
-    width: 25vw;
-}
-.vw-10
-{
-    width: 10vw;
+    @include media-breakpoint-up($breakpoint, $grid-breakpoints)
+    {
+        $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+        @each $size, $value in $view-sizes
+        {
+            .h#{$infix}-#{$size}
+            {
+                height: unquote("#{$value}%") !important;
+            }
+            .w#{$infix}-#{$size}
+            {
+                width: unquote("#{$value}%") !important;
+            }
+            .vh#{$infix}-#{$size}
+            {
+                height: #{$value}vh !important;
+            }
+            .vw#{$infix}-#{$size}
+            {
+                width: #{$value}vw !important;
+            }
+        }
+    }
 }
 
 /* Shadows */
@@ -103,8 +92,13 @@ hr
     flex-basis: content;
 }
 
-/* Tooltip */
-
+/* Navbar */
+button.nav-button
+{
+    width: 100%;
+    text-align: start;
+    box-shadow: none;
+}
 
 /* Anchors */
 a.link
@@ -148,6 +142,11 @@ a.link:focus
     @include media-breakpoint-up(xl) {
         max-width: 100rem;
     }
+}
+.container-response
+{
+    color: $title-color;
+    background-color: $title-bg;
 }
 
 /* Backgrounds */

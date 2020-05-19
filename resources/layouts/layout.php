@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<?php $this->header('header'); ?>
+<?= $this->header('header'); ?>
 <?php
 if (isset($bag['style']) && is_string($bag['style']))
 {
@@ -9,16 +9,14 @@ if (isset($bag['style']) && is_string($bag['style']))
 }
 ?>
 </head>
-<?php
-$this->section('navbar', [
-    'links' => config('NAV', ['Home' => ['link' => 'home/']])
-]);
-?>
 
 <body>
+    <?= $this->section('navbar', [
+        'links' => config('NAV', ['Home' => ['link' => 'home/']])
+    ]);
+    ?>
     <?= $this->content; ?>
+    <?= $this->footer('footer-min'); ?>
 </body>
-
-<?php $this->footer('footer-min'); ?>
 
 </html>

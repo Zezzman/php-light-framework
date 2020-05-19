@@ -12,18 +12,26 @@ export class Remote
         this.domain = domain;
     }
 
-    public call(uri: string, data: [], method: string = "GET", success = null, error = null, headers: {} = {}, dataType: string = "json")
+    public call(uri: string, data: {}, method: string = "GET", success = null, error = null, domain: string = null, headers: {} = {}, dataType: string = "json")
     {
+        if (domain == null)
+        {
+            domain = this.domain;
+        }
         headers['token'] = this.token;
         $.ajax({
             headers : headers,
-            url: this.domain + uri,
+            url: domain + uri,
             type: method,
             dataType: dataType,
             data: data,
             success: function (data, status, response) {
                 if (success)
                     success(data, response, status);
+                if (data['redirect'] !== undefined)
+                {
+                    window.location.href = data['redirect'];
+                }
                 return true;
             },
             error: function (response) {
@@ -33,7 +41,7 @@ export class Remote
             }
         });
     }
-    public listen(uri: string, data: [], method: string = "GET", interval: number = 5000,
+    public listen(uri: string, data: {}, method: string = "GET", interval: number = 5000,
      success = null, error = null, keepAlive: boolean = false, waitForResponse: boolean = true, threshold: number = 5)
     {
         var Action = function (fallback) {
@@ -115,3 +123,46 @@ export class Remote
 }
 
 export var remote = new Remote(remoteDomain);
+
+function formCollection(selector): {}
+{
+    var data = {};
+    var element = $(selector);
+    var inputs = element.find('input, textarea, button[type="submit"]');
+    inputs.each(function (index, item)
+    {
+        let tag = $(item).prop('tagName');
+        let name = $(item).attr('name');
+        let type = $(item).attr('type');
+        let value = $(item).val();
+        data[name] = {
+            tag: tag,
+            name: name,
+            type: type,
+            value: value
+        }
+    });
+    
+    return data;
+}
+$(document).ready(function () {
+    $('form.remote-form').submit(function (event)
+    {
+        var form = $(this);
+        var formAction = $(this).attr('action');
+        var formData = formCollection(this);
+        form.trigger('form-sending', {
+            url: formAction,
+            data: formData
+        });
+        remote.call(formAction, formData, 'POST', function (response)
+        {
+            form.trigger('form-success', response);
+        },
+        function (response)
+        {
+            form.trigger('form-failed', response);
+        }, '');
+        event.preventDefault();
+    });
+});

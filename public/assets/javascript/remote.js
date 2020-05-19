@@ -3,22 +3,29 @@ var Remote = /** @class */ (function () {
         this.token = $('meta[name="token"]').attr('content');
         this.domain = domain;
     }
-    Remote.prototype.call = function (uri, data, method, success, error, headers, dataType) {
+    Remote.prototype.call = function (uri, data, method, success, error, domain, headers, dataType) {
         if (method === void 0) { method = "GET"; }
         if (success === void 0) { success = null; }
         if (error === void 0) { error = null; }
+        if (domain === void 0) { domain = null; }
         if (headers === void 0) { headers = {}; }
         if (dataType === void 0) { dataType = "json"; }
+        if (domain == null) {
+            domain = this.domain;
+        }
         headers['token'] = this.token;
         $.ajax({
             headers: headers,
-            url: this.domain + uri,
+            url: domain + uri,
             type: method,
             dataType: dataType,
             data: data,
             success: function (data, status, response) {
                 if (success)
                     success(data, response, status);
+                if (data['redirect'] !== undefined) {
+                    window.location.href = data['redirect'];
+                }
                 return true;
             },
             error: function (response) {
@@ -127,3 +134,38 @@ var Remote = /** @class */ (function () {
 }());
 export { Remote };
 export var remote = new Remote(remoteDomain);
+function formCollection(selector) {
+    var data = {};
+    var element = $(selector);
+    var inputs = element.find('input, textarea, button[type="submit"]');
+    inputs.each(function (index, item) {
+        var tag = $(item).prop('tagName');
+        var name = $(item).attr('name');
+        var type = $(item).attr('type');
+        var value = $(item).val();
+        data[name] = {
+            tag: tag,
+            name: name,
+            type: type,
+            value: value
+        };
+    });
+    return data;
+}
+$(document).ready(function () {
+    $('form.remote-form').submit(function (event) {
+        var form = $(this);
+        var formAction = $(this).attr('action');
+        var formData = formCollection(this);
+        form.trigger('form-sending', {
+            url: formAction,
+            data: formData
+        });
+        remote.call(formAction, formData, 'POST', function (response) {
+            form.trigger('form-success', response);
+        }, function (response) {
+            form.trigger('form-failed', response);
+        }, '');
+        event.preventDefault();
+    });
+});

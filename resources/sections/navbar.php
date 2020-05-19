@@ -14,15 +14,19 @@ if (isset($bag['links'])) {
                     'name' => $name,
                     'link' => $link['link'],
                     'active' => ($link['link'] === $uri) ? 'active' : '',
+                    'prepend' => $link['prepend'] ?? '',
+                    'append' => $link['append'] ?? '',
                 ];
                 if (isset($link['target']))
                 {
                     $linkObj['target'] = 'target="'. $link['target'] . '"';
                 }
-                $item = System\Helpers\QueryHelper::scanCodes($linkObj, '<li class="nav-item {active}"><a class="nav-link" href="{link}" {target}>{name}</a></li>');
+                $item = System\Helpers\QueryHelper::scanCodes($linkObj, '<li class="nav-item {active}"><a class="nav-link" href="{link}" {target}>{prepend}{name}{append}</a></li>');
                 if (isset($link['align'])) {
                     if ($link['align'] === 'right') {
                         $right .= $item;
+                    } else {
+                        $left .= $item;
                     }
                 } else {
                     $left .= $item;
@@ -31,11 +35,41 @@ if (isset($bag['links'])) {
                 $linkObj = [
                     'name' => $name,
                     'mail' => $link['mail'],
+                    'prepend' => $link['prepend'] ?? '',
+                    'append' => $link['append'] ?? '',
                 ];
-                $item = System\Helpers\QueryHelper::scanCodes($linkObj, '<li class="nav-item"><a class="nav-link" href="mailto:{mail}">{name}</a></li>');
+                $item = System\Helpers\QueryHelper::scanCodes($linkObj, '<li class="nav-item"><a class="nav-link nav-mail" href="mailto:{mail}">{prepend}{name}{append}</a></li>');
                 if (isset($link['align'])) {
                     if ($link['align'] === 'right') {
                         $right .= $item;
+                    } else {
+                        $left .= $item;
+                    }
+                } else {
+                    $left .= $item;
+                }
+            }  elseif (isset($link['button'])) {
+                $linkObj = [
+                    'name' => $name,
+                    'id' => $link['button'],
+                    'style' => $link['style'] ?? '',
+                    'class' => $link['class'] ?? '',
+                    'prepend' => $link['prepend'] ?? '',
+                    'append' => $link['append'] ?? '',
+                ];
+                if (isset($link['data']))
+                {
+                    $linkObj['data'] = '';
+                    foreach ($link['data'] as $name => $value) {
+                        $linkObj['data'] .= "data-$name=\"$value\" ";
+                    }
+                }
+                $item = System\Helpers\QueryHelper::scanCodes($linkObj, '<li class="nav-item"><button class="btn nav-link nav-button {class}" id="{id}" style="{style}" {data}>{prepend}{name}{append}</button></li>');
+                if (isset($link['align'])) {
+                    if ($link['align'] === 'right') {
+                        $right .= $item;
+                    } else {
+                        $left .= $item;
                     }
                 } else {
                     $left .= $item;

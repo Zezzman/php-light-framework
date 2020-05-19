@@ -6,5 +6,5 @@
 		<?= config('APP.AUTHOR');?>.
 		All Rights Reserved.
 	</div>
-	<?php $this->footer('footer-scripts'); ?>
+	<?= $this->footer('footer-scripts'); ?>
 </footer>

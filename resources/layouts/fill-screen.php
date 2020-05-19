@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<?php $this->header('header', config('APP')); ?>
+<?= $this->header('header'); ?>
 <?php
 if (isset($bag['style']) && is_string($bag['style']))
 {
@@ -9,16 +9,19 @@ if (isset($bag['style']) && is_string($bag['style']))
 }
 ?>
 </head>
-<?php
-$this->section('navbar', [
-    'links' => config('NAV', ['Home' => ['link' => 'home/']])
-]);
-?>
 
-<body style="height: 100vh">
-    <?= $this->content; ?>
+<body class="body-grid" style="height: 100vh">
+    <div class="grid-cell">
+        <?= $this->section('navbar', [
+            'links' => config('NAV', ['Home' => ['link' => 'home/']])
+        ]);
+        ?>
+    </div>
+    <div class="grid-cell">
+        <?= $this->content; ?>
+    </div>
+    <div class="grid-cell">
+        <?= $this->footer('footer-min'); ?>
+    </div>
 </body>
-
-<?php $this->footer('footer-min'); ?>
-
 </html>

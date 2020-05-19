@@ -1,0 +1,8 @@
+<script src="https://www.google.com/recaptcha/api.js?render={CAPTCHA.PUBLIC_KEY}"></script>
+<script>
+grecaptcha.ready(function() {
+    grecaptcha.execute('{CAPTCHA.PUBLIC_KEY}', {action: '{action}'}).then(function(token) {
+       console.log('check: ' + token);
+    });
+});
+</script>
