@@ -17,8 +17,8 @@ final class EnvironmentProvider
         'follow' => '~',
     ];
     private static $instance = null;
-    public $configs = [];
-    public $files = [];
+    private $configs = [];
+    private $files = [];
 
     private function __construct() {}
 
@@ -127,7 +127,7 @@ final class EnvironmentProvider
      * 
      * @return  bool     return true when value is set
      */
-    public function set(string $key, $value)
+    public function set(string $key, $value, bool $append = false)
     {
         $configs = &$this->configs;
         if (is_array($configs)) {
@@ -147,67 +147,12 @@ final class EnvironmentProvider
                         return false;
                     }
                 } else {
-                    $this->setKey($configs, $index, $value);
+                    ArrayHelper::setKey($configs, $index, $value, $append);
                 }
             }
             return true;
         }
         return false;
-    }
-    /**
-     * Set array value at key
-     * 
-     * @param   array       $configs            array with configurations
-     * @param   string      $key                key name within array
-     * @param   bool        $value              value of the key that will be set
-     * 
-     * @return  bool     return true when value is set
-     */
-    private function setKey(array &$configs, string $key, $value)
-    {
-        if (is_array($configs)) {
-            if (isset($configs[$key])) {
-                if (is_array($configs[$key])) {
-                    if (is_array($value)) {
-                        $configs[$key] = array_merge($configs[$key], $value); // merge values
-                    } else {
-                        // $configs[$key] = $value; // Set value | No push
-                        array_push($configs[$key], $value); // Push value
-                    }
-                } else {
-                    $configs[$key] = $value; // Set value
-                }
-            } else {
-                $configs[$key] = $value; // Add value
-            }
-            return true;
-        }
-        return false;
-    }
-    /**
-     * Merge configuration settings recursively
-     * 
-     * @param   array      $configs             configuration settings
-     * @param   array      $changes              new configurations that will be merge with the $settings array
-     * 
-     * @return  array     return new merged array
-     */
-    private function mergeRecursively(array $configs, array $changes)
-    {
-        if (is_array($changes) && ! empty($changes)) {
-            foreach ($changes as $key => $value) {
-                if (isset($configs[$key])) {
-                    if (is_array($configs[$key]) && is_array($value)) {
-                        $this->setKey($configs, $key, $this->mergeRecursively($configs[$key], $value));
-                    } else {
-                        $this->setKey($configs, $key, $value);
-                    }
-                } else {
-                    $this->setKey($configs, $key, $value);
-                }
-            }
-        }
-        return $configs;
     }
     /**
      * Add configurations to settings
@@ -219,7 +164,7 @@ final class EnvironmentProvider
     public function add(array $configs)
     {
         if (! empty($configs)) {
-            $this->configs = $this->mergeRecursively($this->configs, $configs);
+            $this->configs = ArrayHelper::mergeRecursively($this->configs, $configs, true);
             return true;
         }
         return false;

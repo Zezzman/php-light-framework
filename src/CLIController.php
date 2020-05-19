@@ -3,7 +3,7 @@ namespace System;
 
 use System\Interfaces\IRequest;
 use System\Interfaces\IController;
-use System\Models\CLIRequestModel;
+use System\Models\Requests\CLIRequestModel;
 use System\Helpers\DataCleanerHelper;
 use Exception;
 /**
@@ -38,8 +38,6 @@ class CLIController implements IController
      */
     public static function respond(int $code, $message = null, IRequest $request = null, Exception $exception = null)
     {
-        ob_start();
-        ob_clean();
         $responses = \Launcher::Responses();
 
         if (isset($responses[$code])) {

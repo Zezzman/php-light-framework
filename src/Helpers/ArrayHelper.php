@@ -496,7 +496,7 @@ final class ArrayHelper
      * 
      * @return  bool     return true when value is set
      */
-    public static function setKey(array &$array, string $key, $value)
+    public static function setKey(array &$array, string $key, $value, bool $append = true)
     {
         if (is_array($array)) {
             if ($key !== '')
@@ -504,10 +504,16 @@ final class ArrayHelper
                 if (isset($array[$key])) {
                     if (is_array($array[$key])) {
                         if (is_array($value)) {
-                            $array[$key] = self::mergeRecursively($array[$key], $value, false); // merge values
+                            $array[$key] = self::mergeRecursively($array[$key], $value, $append); // merge values
                         } else {
-                            // $array[$key] = $value; // Set value | No push
-                            array_push($array[$key], $value); // Push value
+                            if ($append)
+                            {
+                                array_push($array[$key], $value); // Push value
+                            }
+                            else
+                            {
+                                $array[$key] = $value; // Set value | No push
+                            }
                         }
                     } else {
                         $array[$key] = $value; // Set value
@@ -544,13 +550,13 @@ final class ArrayHelper
                         {
                             if (isset($subArray[$index]))
                             {
-                                if ($append)
+                                if (is_numeric($index) && $append)
                                 {
                                     self::setKey($subArray, '', $value[$index]);
                                 }
                                 else
                                 {
-                                    self::setKey($subArray, $index, self::mergeRecursively($subArray[$index], $value[$index]));
+                                    self::setKey($subArray, $index, $value[$index], $append);
                                 }
                             }
                             else
@@ -560,7 +566,14 @@ final class ArrayHelper
                         }
                         $array[$key] = $subArray;
                     } else {
-                        self::setKey($array, $key, $value);
+                        if (is_numeric($key) && $append)
+                        {
+                            self::setKey($array, '', $value);
+                        }
+                        else
+                        {
+                            self::setKey($array, $key, $value, $append);
+                        }
                     }
                 } else {
                     self::setKey($array, $key, $value);

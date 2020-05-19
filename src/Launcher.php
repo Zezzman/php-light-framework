@@ -273,6 +273,11 @@ final class Launcher
         return [
             200 => 'OK',
             204 => 'No Content',
+            301 => 'Moved Permanently',
+            302 => 'Found',
+            303 => 'See Other',
+            307 => 'Temporary Redirect',
+            308 => 'Permanent Redirect',
             401 => 'Unauthorized',
             403 => 'Forbidden',
             404 => 'Not Found',
@@ -307,10 +312,10 @@ function config(string $constant, $default = false)
  * 
  * @return  bool     return true when value is set
  */
-function setConfig(string $constant, $value)
+function setConfig(string $constant, $value, bool $append = false)
 {
     if (! is_null(Launcher::instance())) {
-        return EnvironmentProvider::instance()->set($constant, $value);
+        return EnvironmentProvider::instance()->set($constant, $value, $append);
     }
     throw new Exception('App Not Instantiated');
 }

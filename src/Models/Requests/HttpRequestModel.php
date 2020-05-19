@@ -506,4 +506,38 @@ class HttpRequestModel extends RequestModel
         }
         return $this;
     }
+    /**
+     * Execute Function When Matching
+     */
+    public function onMatching(\Closure $func, string $name = null)
+    {
+        if ($this->valid()) {
+            if (! \is_null($name))
+            {
+                $this->onMatching[$name] = $func;
+            }
+            else
+            {
+                $this->onMatching[] = $func;
+            }
+        }
+        return $this;
+    }
+    /**
+     * Execute Function When Matched
+     */
+    public function onMatched(\Closure $func, string $name = null)
+    {
+        if ($this->valid()) {
+            if (! \is_null($name))
+            {
+                $this->onMatching[$name] = $func;
+            }
+            else
+            {
+                $this->onMatching[] = $func;
+            }
+        }
+        return $this;
+    }
 }

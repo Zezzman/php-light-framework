@@ -9,7 +9,7 @@ use System\Helpers\HTTPHelper;
 use System\Helpers\FileHelper;
 use System\Helpers\DataCleanerHelper;
 use System\Exceptions\RespondException;
-use System\Models\HttpRequestModel;
+use System\Models\Requests\HttpRequestModel;
 use System\ViewModels\ViewModel;
 use System\ViewModels\ExceptionViewModel;
 use System\View;
@@ -61,12 +61,12 @@ class Controller implements IController
      * 
      * @return  View    return new created view
      */
-    public function view(string $name = '', IViewModel $model = null, array $bag = [])
+    public function view(string $name = '', IViewModel $model = null, array $bag = [], string $layout = null)
     {
         if (! empty($name)) {
             try {
                 if (is_null($this->view)) {
-                    $this->view = View::create($this, $name, 'view', $model, $bag, true);
+                    $this->view = View::create($this, $name, 'view', $model, $bag, $layout ?? config('LAYOUT.DEFAULT'));
                 } else {
                     $this->view->appendView($name, 'view', $model, $bag);
                 }
@@ -157,7 +157,7 @@ class Controller implements IController
                 $file = 'index';
             }
             try {
-                $view = View::create($respond, $file, 'response', $viewModel, [], true);
+                $view = View::create($respond, $file, 'response', $viewModel, [], 'fill-screen');
                 if (! is_null($view)
                 && ($content = $view->render()) !== false)
                 {

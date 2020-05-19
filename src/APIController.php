@@ -3,7 +3,7 @@ namespace System;
 
 use System\Interfaces\IRequest;
 use System\Interfaces\IController;
-use System\Models\HttpRequestModel;
+use System\Models\Requests\HttpRequestModel;
 use System\Helpers\DataCleanerHelper;
 use System\Helpers\HTTPHelper;
 use Exception;
@@ -110,34 +110,33 @@ abstract class APIController implements IController
     public static function respond(int $code, $message = null, IRequest $request = null, Exception $exception = null, $body = [])
     {
         $responses = \Launcher::Responses();
-
-        if (! is_null($request)) {
-            $redirect = $request->redirect;
-            if (! is_null($redirect)) {
-                $responseCode = http_response_code();
-                HTTPHelper::redirect($redirect, $request->params, ($responseCode !== 200 ? $responseCode : null));
-            }
-        }
+        $redirect = $request->redirect ?? null;
         if (isset($responses[$code])) {
             $response = $responses[$code];
-            http_response_code($code);
-            $body['response'] = $code;
-            $body['type'] = $response;
+            $body['code'] = $code;
+            $body['response'] = $response;
+            if (! is_null($redirect))
+            {
+                $body['redirect'] = $redirect;
+            }
             if (is_string($message)) {
-                $body['message'] = DataCleanerHelper::cleanValue($message ?? '');
+                $body['body'] = DataCleanerHelper::cleanValue($message ?? '');
             } else {
                 $message = DataCleanerHelper::cleanArray((array) $message);
-                $body['message'] = $message;
+                $body['body'] = $message;
             }
             if (! is_null($exception) && config('SETTINGS.DEBUG', false)) {
                 $body['request'] = $request;
-                $body['Exception'] = $exception;
-                if ($body['message'] === '') {
-                    $body['message'] = DataCleanerHelper::cleanValue($exception->getMessage());
+                $body['exception'] = $exception;
+                if ($body['body'] === '') {
+                    $body['body'] = DataCleanerHelper::cleanValue($exception->getMessage());
                 }
             }
+            http_response_code(200);
             echo json_encode($body);
+            exit();
         }
+        http_response_code(404);
         exit();
     }
 }

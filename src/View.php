@@ -38,15 +38,15 @@ class View
     /**
      * 
      */
-    public static function create(IController $controller, string $name, string $type, IViewModel $model = null, array $bag = [], bool $includeLayout = false)
+    public static function create(IController $controller, string $name, string $type, IViewModel $model = null, array $bag = [], string $layout = null)
     {
         $view = new self($controller);
         $viewData = ViewFactory::createView($name, $type, $model, $bag);
         if ($viewData->valid()) {
             $view->currentView = $viewData;
             $view->viewData[$name] = $viewData;
-            if ($includeLayout && config('LAYOUT.DEFAULT', false) !== false) {
-                $view->layout(config('LAYOUT.DEFAULT'));
+            if (! is_null($layout)) {
+                $view->layout($layout);
             }
             return $view;
         }
@@ -121,16 +121,30 @@ class View
     /**
      * Prepend Content Before Views and Layout
      */
-    public function prepend(string $content)
+    public function prepend(string $content, string $view = null)
     {
-        $this->prepend .= $content;
+        if (is_null($view))
+        {
+            $this->prepend .= $content;
+        }
+        else
+        {
+            $this->viewData($view)->prepend($content);
+        }
     }
     /**
      * Append Content After Views and Layout
      */
     public function append(string $content)
     {
-        $this->append .= $content;
+        if (is_null($view))
+        {
+            $this->append .= $content;
+        }
+        else
+        {
+            $this->viewData($view)->append($content);
+        }
     }
     /**
      * 
@@ -143,25 +157,28 @@ class View
     {
         if (($content = $this->loadFile('headers/' . $name  . '.php', $bag)) !== false)
         {
-            echo $content;
+            return $content;
         }
+        return '';
     }
     private function footer(string $name, array $bag = null)
     {
         if (($content = $this->loadFile('footers/' . $name  . '.php', $bag)) !== false)
         {
-            echo $content;
+            return $content;
         }
+        return '';
     }
     /**
      * 
      */
-    private function section(string $name, array $bag = null)
+    public function section(string $name, array $bag = null)
     {
         if (($content = $this->loadFile('sections/' . $name  . '.php', $bag)) !== false)
         {
-            echo $content;
+            return $content;
         }
+        return '';
     }
     /**
      * 
@@ -177,15 +194,20 @@ class View
         $path = FileHelper::secureRequiredPath($path);
         if (! empty($path)) {
             if (file_exists($path)) {
-                ob_start();
-                if ((include($path)) !== false)
-                {
-                    $content = ob_get_clean();
-                    return $content;
-                }
-                else
-                {
-                    return false;
+                try {
+                    ob_start();
+                    if ((include($path)) !== false)
+                    {
+                        $content = ob_get_clean();
+                        return $content;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                } catch (Exception $e) {
+                    ob_end_clean();
+                    throw $e;
                 }
             }
         }
@@ -194,13 +216,13 @@ class View
     /**
      * 
      */
-    public function card(string $name, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false)
+    public function card(string $name, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = true)
     {
         if (! isset($this->cacheCards[$name]))
         {
             $this->cacheCards[$name] = (string) FileHelper::loadFile('cards/' . $name);
         }
-        echo QueryHelper::scanCodes($this->bag($codes, false), $this->cacheCards[$name], $defaults, $list, $listLength, $allowEmpty);
+        echo QueryHelper::deepScanCodes($this->bag($codes, false), $this->cacheCards[$name], $defaults, $list, $listLength, $allowEmpty);
     }
     /**
      * 
@@ -222,6 +244,7 @@ class View
 
         $hasView = false;
         $body = '';
+        
         // render views
         foreach ($this->viewData as $view) {
             $this->currentView = $view;
@@ -239,7 +262,7 @@ class View
         } else {
             // include body within layout
             $this->content = $body;
-            $this->bag(['scripts' => [ ($this->layout) => ['path' => '../public/assets/javascript/' . $this->layout . '.js']]]);
+            // $this->bag(['scripts' => [ ($this->layout) => ['path' => '../public/assets/javascript/' . $this->layout . '.js']]]);
             if (($layout = $this->loadFile('layouts/' . $this->layout . '.php', [
                 'style' => $style = FileHelper::loadFile('../public/assets/css/' . $this->layout . '.css')
             ])) !== false)
@@ -254,6 +277,7 @@ class View
             }
         }
         $this->cacheCards = [];
+        ob_end_clean();
         return $this->content;
     }
     /**

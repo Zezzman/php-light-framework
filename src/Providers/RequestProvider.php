@@ -2,6 +2,8 @@
 namespace System\Providers;
 
 use System\Factories\RequestFactory;
+use System\Providers\AuthProvider;
+use System\Interfaces\IRequest;
 use Exception;
 /**
  * Manage client request
@@ -12,6 +14,7 @@ use Exception;
 final class RequestProvider
 {
     private $request = null;
+    private $matchedRequest = null;
     private $designatedRequests = [];
 
     public function __construct(string $requestType, string $routeFile, string $uri)
@@ -22,7 +25,11 @@ final class RequestProvider
         {
             //load routes
             if (file_exists($routeFile)) {
-                require($routeFile);
+                $result = require($routeFile);
+                if ($result instanceof IRequest)
+                {
+                    $this->matchedRequest = $result;
+                }
             } else {
                 if (config('SETTINGS.DEBUG', false))
                 {
@@ -43,30 +50,33 @@ final class RequestProvider
     {
         $selectedRequest = RequestFactory::emptyHttpRequest();
 
-        foreach ($this->designatedRequests as $key => $request)
+        if (is_null($this->matchedRequest))
         {
-            if ($this->request->matchRequest($request))
+            foreach ($this->designatedRequests as $key => $request)
             {
-                if ($this->request->requestMethod($request->method))
+                if ($this->request->matchRequest($request))
                 {
-                    if (! $selectedRequest->valid())
+                    if ($this->request->requestMethod($request->method))
                     {
-                        $request->isMatching();
-                        $request->uri = $this->request->uri;
-                        if ($request->valid()
-                        && $request->isMatched())
+                        if (! $selectedRequest->valid())
                         {
+                            $request->isMatching();
+                            $request->uri = $this->request->uri;
+                            if ($request->valid()
+                            && $request->isMatched())
+                            {
+                                $selectedRequest = $request;
+                                break;
+                            }
                             $selectedRequest = $request;
-                            break;
                         }
-                        $selectedRequest = $request;
                     }
                 }
             }
+            $this->matchedRequest = $selectedRequest;
         }
-        
-        $this->request = $selectedRequest;
-        return $this->request;
+
+        return $this->matchedRequest;
     }
     /**
      * 
@@ -75,7 +85,17 @@ final class RequestProvider
     {
         $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request->route);
         if (config('PERMISSIONS.ALLOW_GUESTS') === false) {
-            $this->auth();
+            if ($this->isGuest())
+            {
+                if ($currentRequest->settings('AUTH.GUEST.VISIBLE_RESTRICTIONS', true) === true)
+                {
+                    $currentRequest->respond(403, 'Request only allowed as guest');
+                }
+                else
+                {
+                    $currentRequest->respond(404);
+                }
+            }
         }
         return $currentRequest;
     }
@@ -111,5 +131,26 @@ final class RequestProvider
             $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;
+    }
+    /**
+     * Only Allow Authorized Users
+     */
+    public function isAuth(int $access = -1)
+    {
+        return AuthProvider::isAuthorized($access);
+    }
+    /**
+     * Only Allow Guests
+     */
+    public function isGuest()
+    {
+        return ! AuthProvider::isAuthorized();
+    }
+    /**
+     * Create Response
+     */
+    public function respond(int $code, string $message = null)
+    {
+        return $this->createRequest(getenv('REQUEST_METHOD'), '', '')->respond($code, $message);
     }
 }

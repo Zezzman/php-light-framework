@@ -172,12 +172,12 @@ final class AuthProvider
      * 
      * @return  bool    return true if username session is set
      */
-    public static function isAuthorized(int $access = 0)
+    public static function isAuthorized(int $access = -1)
     {
         SessionProvider::startSession();
         if (SessionProvider::hasSession()) {
             if (isset($_SESSION['username'])) {
-                if ($access !== 0) {
+                if ($access > -1) {
                     return isset($_SESSION['access_level']) 
                         && $_SESSION['access_level'] === $access;
                 }
