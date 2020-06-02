@@ -1,0 +1,69 @@
+/* Responsive */
+@each $breakpoint in map-keys($grid-breakpoints)
+{
+    @include media-breakpoint-up($breakpoint, $grid-breakpoints)
+    {
+        $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+        /* Heights & Widths */
+        @each $size, $value in $view-sizes
+        {
+            .h#{$infix}-#{$size}
+            {
+                height: unquote("#{$value}%") !important;
+            }
+            .w#{$infix}-#{$size}
+            {
+                width: unquote("#{$value}%") !important;
+            }
+            .vh#{$infix}-#{$size}
+            {
+                height: #{$value}vh !important;
+            }
+            .vw#{$infix}-#{$size}
+            {
+                width: #{$value}vw !important;
+            }
+            .hx#{$infix}-#{$size}
+            {
+                max-height: unquote("#{$value}%") !important;
+            }
+            .wx#{$infix}-#{$size}
+            {
+                max-width: unquote("#{$value}%") !important;
+            }
+            .vhx#{$infix}-#{$size}
+            {
+                max-height: #{$value}vh !important;
+            }
+            .vwx#{$infix}-#{$size}
+            {
+                max-width: #{$value}vw !important;
+            }
+            .hm#{$infix}-#{$size}
+            {
+                min-height: unquote("#{$value}%") !important;
+            }
+            .wm#{$infix}-#{$size}
+            {
+                min-width: unquote("#{$value}%") !important;
+            }
+            .vhm#{$infix}-#{$size}
+            {
+                min-height: #{$value}vh !important;
+            }
+            .vwm#{$infix}-#{$size}
+            {
+                min-width: #{$value}vw !important;
+            }
+        }
+        
+        /* Borders */
+        @each $size, $value in $border-sizes
+        {
+            .border#{$infix}-#{$size}
+            {
+                border-width: $value !important;
+            }
+        }
+    }
+}

@@ -1,65 +1,59 @@
-/* Overlay */
-$overlay-color: $white;
-$overlay-bg: $tp-dark;
+/* Sections */
+$default-color: $white;
+$default-bg: $blue-green;//$blue-dark;
+$default-border-color: $border-color;
+$default-border: 1px solid $default-border-color;
+$default-link-decoration: none;
+$default-link-hover-decoration: $link-hover-decoration;
+$default-link-color: $link-color;
+$default-link-hover-color: $link-hover-color;
+$default-properties: (
+    'color': $default-color,
+    'bg': $default-bg,
+    'border-color': $default-border-color,
+    'border': $default-border,
+    'link-decoration': $default-link-decoration,
+    'link-hover-decoration': $default-link-hover-decoration,
+    'link-color': $default-link-color,
+    'link-hover-color': $default-link-hover-color,
+) !default;
 
-/* Backgrounds */
-$body-color: $white;
-$body-bg: $blue-dark;
+@include create-section('body', (), $default-properties);
+@include create-section('overlay', (
+    'bg': $tp-dark,
+    'link-color': inherit,
+    'link-hover-color': $gray-300,
+), $default-properties);
+@include create-section('title', (
+    'bg': $blue-green,
+    'link-hover-decoration': underline,
+    'link-color': inherit,
+    'link-hover-color': $gray-800,
+), $default-properties);
+@include create-section('section', (
+    'bg': $blue-dark,
+    'border-color': $blue-green,
+    'border': 1px solid $blue-green,
+    'link-color': inherit,
+    'link-hover-color': $gray-300,
+), $default-properties);
+@include create-section('section-alt', (
+    'color': $black,
+    'bg': $gray-400,
+    'border': $black,
+    'link-color': inherit,
+    'link-hover-color': $gray-800,
+), $default-properties);
+@include create-section('section-light', (
+    'color': $black,
+    'bg': $light,
+    'border': $black,
+    'link-color': inherit,
+    'link-hover-color': $gray-800,
+), $default-properties);
 
-$title-color: $white;
-$title-bg: $blue-green;
-
-$section-color: $white;
-$section-bg: $blue-dark;
-
-$section-alt-color: $black;
-$section-alt-bg: $gray-400;
-
-/* Borders */
-$border-color: $white;
-
-/* Classes */
-.overlay-color
+/* Navbar */
+.navbar
 {
-    color: $overlay-color;
-}
-.overlay-bg
-{
-    background-color: $overlay-bg;
-}
-.body-color
-{
-    color: $body-color;
-}
-.body-bg
-{
-    background-color: $body-bg;
-}
-.title-color
-{
-    color: $title-color;
-}
-.title-bg
-{
-    background-color: $title-bg;
-}
-.section-color
-{
-    color: $section-color;
-}
-.section-bg
-{
-    background-color: $section-bg;
-}
-.section-alt-color
-{
-    color: $section-alt-color;
-}
-.section-alt-bg
-{
-    background-color: $section-alt-bg;
-}
-.border-color
-{
-    color: $border-color;
+    @extend .navbar-dark;
 }

@@ -1,21 +1,39 @@
-@mixin create-grid($col-size, $row-size: null) {
+@mixin create-grid($col-size, $row-size: 150px)
+{
     display: grid;
     grid-template-columns: repeat($col-size, 1fr);
-    @if $row-size != null {
-        grid-auto-rows: $row-size;
-    }
-    
+
     > .grid-cell
     {
         width: 100%;
         height: 100%;
         position: relative;
-        @each $breakpoint in map-keys($grid-breakpoints)
+    }
+    /* Rows */
+    @if $row-size != null {
+        grid-auto-rows: $row-size;
+    }
+    @each $breakpoint in map-keys($grid-breakpoints)
+    {
+        @include media-breakpoint-up($breakpoint, $grid-breakpoints)
         {
-            @include media-breakpoint-up($breakpoint, $grid-breakpoints)
+            $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+
+            @for $i from 1 through 12
             {
-                $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
-                @for $i from 1 through $col-size {
+                &.grid-r#{$infix}-#{$i}
+                {
+                    grid-auto-rows: $row-size * $i;
+                }
+            }
+            @for $i from 1 through $col-size
+            {
+                &.grid-c#{$infix}-#{$i}
+                {
+                    grid-template-columns: repeat(#{$i}, 1fr);
+                }
+                > .grid-cell
+                {
                     &.r#{$infix}-#{$i}
                     {
                         grid-row: span #{$i};
@@ -29,7 +47,10 @@
         }
     }
 }
-
+.grid
+{
+    @include create-grid(12, 50px)
+}
 .body-grid
 {
     @include create-grid(1);

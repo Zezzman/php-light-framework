@@ -1,15 +1,24 @@
 /* Tags */
 body
 {
+    @extend .body;
     height: 100%;
     margin: 0;
-    color: $body-color;
-    background-color: $body-bg;
 }
-
-hr
+footer
 {
-    border-color: $border-color;
+    @extend .body;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+a.clean-link
+{
+    text-decoration: none;
+}
+a.clean-link:hover,
+a.clean-link:focus
+{
+    text-decoration: none;
 }
 
 /* heights & widths */
@@ -21,45 +30,21 @@ hr
 {
     width: min-content;
 }
-
-$view-sizes: (
-    '100': 100,
-    '90': 90,
-    '85': 85,
-    '80': 80,
-    '75': 75,
-    '60': 60,
-    '50': 50,
-    '45': 45,
-    '35': 35,
-    '25': 25,
-    '10': 10
-);
-@each $breakpoint in map-keys($grid-breakpoints)
+.hx-min
 {
-    @include media-breakpoint-up($breakpoint, $grid-breakpoints)
-    {
-        $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
-        @each $size, $value in $view-sizes
-        {
-            .h#{$infix}-#{$size}
-            {
-                height: unquote("#{$value}%") !important;
-            }
-            .w#{$infix}-#{$size}
-            {
-                width: unquote("#{$value}%") !important;
-            }
-            .vh#{$infix}-#{$size}
-            {
-                height: #{$value}vh !important;
-            }
-            .vw#{$infix}-#{$size}
-            {
-                width: #{$value}vw !important;
-            }
-        }
-    }
+    max-height: min-content;
+}
+.wx-min
+{
+    max-width: min-content;
+}
+.hm-min
+{
+    max-height: min-content;
+}
+.wm-min
+{
+    max-width: min-content;
 }
 
 /* Shadows */
@@ -77,12 +62,8 @@ $view-sizes: (
     box-shadow: $shadow-card;
 }
 
-/* Rows */
-.bold-row {
-    @extend .row;
-    * {
-        font-weight: bold;
-    }
+.bold {
+    @extend .font-weight-bold;
 }
 
 /* Columns */
@@ -93,34 +74,21 @@ $view-sizes: (
 }
 
 /* Navbar */
-button.nav-button
+.navbar
 {
-    width: 100%;
-    text-align: start;
-    box-shadow: none;
+    button.nav-button
+    {
+        display: block;
+        text-align: start;
+        box-shadow: none;
+        width: 100%;
+        &:focus
+        {
+            outline: 1px dotted;
+        }
+    }
 }
 
-/* Anchors */
-a.link
-{
-    text-decoration: none;
-    color: $link-color;
-}
-a.link:hover,
-a.link:focus
-{
-    text-decoration: $link-hover-decoration;
-    color: $link-hover-color;
-}
-
-/* Footers */
-.footer-min
-{
-    color: $body-color;
-    background-color: $body-bg;
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-}
 
 /* Containers */
 .container-inner
@@ -145,25 +113,8 @@ a.link:focus
 }
 .container-response
 {
-    color: $title-color;
-    background-color: $title-bg;
-}
-
-/* Backgrounds */
-.title
-{
-    color: $title-color;
-    background-color: $title-bg;
-}
-.section
-{
-    color: $section-color;
-    background-color: $section-bg;
-}
-.section-alt
-{
-    color: $section-alt-color;
-    background-color: $section-alt-bg;
+    color: $white;
+    background-color: $blue-green;
 }
 
 /* Text */

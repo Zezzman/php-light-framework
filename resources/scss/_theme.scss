@@ -1,1 +1,66 @@
+@mixin create-section($section, $properties, $defaults) {
+    .#{$section}
+    {
+        $color: map-get($properties, 'color');
+        $bg: map-get($properties, 'bg');
+        $border-color: map-get($properties, 'border-color');
+        $border: map-get($properties, 'border');
+        $link-decoration: map-get($properties, 'link-decoration');
+        $link-color: map-get($properties, 'link-color');
+        $link-hover-decoration: map-get($properties, 'link-hover-decoration');
+        $link-hover-color: map-get($properties, 'link-hover-color');
+
+        @if $color == null { color: map-get($defaults, 'color'); }
+        @else if $color { color: $color; };
+        @if $bg == null { background-color: map-get($defaults, 'bg'); }
+        @else if $bg { background-color: $bg; };
+        a
+        {
+            @if $link-decoration == null { text-decoration: map-get($defaults, 'link-decoration'); }
+            @else if $link-decoration { text-decoration: $link-decoration; };
+            @if $link-color == null { color: map-get($defaults, 'link-color'); }
+            @else if $link-color { color: $link-color; };
+        }
+        a:hover,
+        a:focus
+        {
+            @if $link-hover-decoration == null { text-decoration: map-get($defaults, 'link-hover-decoration'); }
+            @else if $link-hover-decoration { text-decoration: $link-hover-decoration; };
+            @if $link-hover-color == null { color: map-get($defaults, 'link-hover-color'); }
+            @else if $link-hover-color { color: $link-hover-color; };
+        }
+        &-color
+        {
+            @if $color == null { color: map-get($defaults, 'color'); }
+            @else if $color { color: $color; };
+        }
+        &-bg
+        {
+            @if $bg == null { background-color: map-get($defaults, 'bg'); }
+            @else if $bg { background-color: $bg; };
+        }
+        &-border,
+        .border
+        {
+            @if $border == null { border: map-get($defaults, 'border') !important; }
+            @else if $border { border: $border !important; };
+        }
+        .border-none
+        {
+            border: none !important;
+        }
+        hr,
+        &-border-color,
+        .border-color
+        {
+            @if $border-color == null { border-color: map-get($defaults, 'border-color') !important; }
+            @else if $border-color { border-color: $border-color !important; };
+        }
+        .border-bg
+        {
+            @if $border-color == null { border-color: map-get($defaults, 'bg') !important; }
+            @else if $border-color { border-color: $bg !important; };
+        }
+    }
+}
 @import 'themes/dark';
