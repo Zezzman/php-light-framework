@@ -29,21 +29,17 @@ final class FileHelper
     /**
      * Encodes and Print Image into img tag
      */
-    public static function printImage(string $path, string $type = 'image/png', string $description = '', string $style = '<img src="data:{type};{base},{data}" alt="{description}">')
+    public static function printImage(string $content, string $type = 'image/png', string $description = '', string $style = '<img src="data:{type};{base},{data}" alt="{description}">')
     {
-        $path = self::securePath($path);
-        if (file_exists($path) && is_file($path)) {
-            $file = [
-                'path' => $path,
-                'description' => DataCleanerHelper::cleanValue($description),
-                'data' => base64_encode(file_get_contents($path)),
-                'type' => $type,
-                'base' => 'base64',
-            ];
-            return QueryHelper::scanCodes($file, $style);
-        } else {
-            return '';
-        }
+        $data = base64_encode($content);
+
+        $file = [
+            'description' => DataCleanerHelper::cleanValue($description),
+            'data' => $data,
+            'type' => $type,
+            'base' => 'base64',
+        ];
+        return QueryHelper::scanCodes($file, $style);
     }
     /**
      * Read File of type

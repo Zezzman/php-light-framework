@@ -11,15 +11,14 @@ $app = Launcher::setup();
 setConfig('APP', ['ARGV' => ($argv ?? [])]);
 
 /**
- * Routes
+ * Requests
  */
-$router = new System\Router();
-$request = $router->request;
+$app->getRequest();
 
 /**
  * Run Application
  */
-$app->run($request);
+$app->run();
 
 /**
  * Close application

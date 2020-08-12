@@ -1,4 +1,5 @@
 <?php
+use System\Router;
 use System\Interfaces\IController;
 use System\Controller;
 use System\APIController;
@@ -18,6 +19,8 @@ final class Launcher
 {
     private static $instance = null;
     public $environment = null;
+    public $router = null;
+
     /**
      * Private the constructor to stop instantiations
      */
@@ -44,6 +47,9 @@ final class Launcher
             // Load configurations
             $instance->environment = EnvironmentProvider::instance();
             $instance->environment->setup();
+
+            // Create Router
+            $instance->router = new Router();
             
             // Set debug output
             if (config('SETTINGS.DEBUG', false)) {
@@ -70,6 +76,31 @@ final class Launcher
         return self::$instance;
     }
     /**
+     * Get Resource Request
+     */
+    public function getRequest()
+    {
+        if ($this->router->type() === 'webserver') {
+            $this->getWebRequest();
+        } elseif ($this->router->type() === 'api') {
+            $this->getAPIRequest();
+        } elseif ($this->router->type() === 'cli') {
+            $this->getCLIRequest();
+        }
+    }
+    public function getWebRequest()
+    {
+        $this->router->webRoutes();
+    }
+    public function getAPIRequest()
+    {
+        $this->router->apiRoutes();
+    }
+    public function getCLIRequest()
+    {
+        $this->router->cliRoutes();
+    }
+    /**
      * Run app with request provided to from client
      * to access resources
      * 
@@ -78,8 +109,9 @@ final class Launcher
      * 
      * @param   IRequest     $request           request sent from the client
      */
-    public function run(IRequest $request)
+    public function run(IRequest $request = null)
     {
+        $request = ($request ?? ($this->router->request()));
         $type = config('CLIENT_TYPE');
         if ($type === 'webserver') {
             /**
@@ -268,6 +300,18 @@ final class Launcher
         $controller->render();
         return $controller;
     }
+    public function isAuth()
+    {
+        return AuthProvider::isAuthorized();
+    }
+    public function Referer()
+    {
+        return SessionProvider::get('refererURI');
+    }
+    public function RefererCode()
+    {
+        return SessionProvider::get('refererCode');
+    }
     public static function Responses()
     {
         return [
@@ -299,7 +343,11 @@ final class Launcher
  */
 function config(string $constant, $default = false)
 {
-    if (! is_null(Launcher::instance())) {
+    if (defined($constant))
+    {
+        return constant($constant) ?? $default;
+    }
+    else if (! is_null(Launcher::instance())) {
         return EnvironmentProvider::instance()->configurations($constant, $default);
     }
     throw new Exception('App Not Instantiated');

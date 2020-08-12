@@ -47,12 +47,16 @@ class FileModel
      */
     public function type()
     {
-        if ($this->isValid()) {
+        if (isset($this->info['mime']))
+        {
+            return $this->info['mime'];
+        }
+        else if ($this->isValid())
+        {
             $path = $this->path();
             return mime_content_type($path);
-        } else {
-            return false;
         }
+        return false;
     }
     /**
      * File name
@@ -74,7 +78,10 @@ class FileModel
      */
     public function path()
     {
-        if (! empty($this->info)) {
+        if (isset($this->info['tmp_path']))
+        {
+            return $this->info['tmp_path'];
+        } else if (! empty($this->info)) {
             return $this->info['dirname'] . DIRECTORY_SEPARATOR . $this->name();
         } else {
             return '';
@@ -114,7 +121,7 @@ class FileModel
      */
     public function print(string $description = '', string $style = '<img src="data:{type};{base},{data}" alt="{description}">')
     {
-        return FileHelper::printImage($this->path(), $this->type(), $description, $style);
+        return FileHelper::printImage(file_get_contents($this->path()), $this->type(), $description, $style);
     }
     /**
      * Check if file is within directory

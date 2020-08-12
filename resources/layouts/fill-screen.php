@@ -10,7 +10,7 @@ if (isset($bag['style']) && is_string($bag['style']))
 ?>
 </head>
 
-<body class="body-grid" style="height: 100vh">
+<body class="list-grid" style="height: 100vh">
     <div class="grid-cell">
         <?= $this->section('navbar', [
             'links' => config('NAV', ['Home' => ['link' => 'home/']])

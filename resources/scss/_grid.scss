@@ -1,7 +1,7 @@
-@mixin create-grid($col-size, $row-size: 150px)
+@mixin create-grid($cols, $rows: 12, $row-height: 150px)
 {
     display: grid;
-    grid-template-columns: repeat($col-size, 1fr);
+    grid-template-columns: repeat($cols, 1fr);
 
     > .grid-cell
     {
@@ -9,9 +9,8 @@
         height: 100%;
         position: relative;
     }
-    /* Rows */
-    @if $row-size != null {
-        grid-auto-rows: $row-size;
+    @if $row-height != null {
+        grid-auto-rows: $row-height;
     }
     @each $breakpoint in map-keys($grid-breakpoints)
     {
@@ -19,29 +18,68 @@
         {
             $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
 
-            @for $i from 1 through 12
+            @if ($rows > 1)
             {
-                &.grid-r#{$infix}-#{$i}
+                @for $i from 1 through $rows
                 {
-                    grid-auto-rows: $row-size * $i;
+                    &.grid-r#{$infix}-#{$i}
+                    {
+                        /* Rows */
+                        grid-auto-rows: $row-height * $i;
+                    }
+                    > .grid-cell
+                    {
+                        &.r#{$infix}-#{$i}
+                        {
+                            grid-row: span #{$i};
+                        }
+                    }
                 }
             }
-            @for $i from 1 through $col-size
+
+            @if ($cols > 1)
             {
-                &.grid-c#{$infix}-#{$i}
+                @for $i from 1 through $cols
                 {
-                    grid-template-columns: repeat(#{$i}, 1fr);
+                    &.grid-c#{$infix}-#{$i}
+                    {
+                        /* Columns */
+                        grid-template-columns: repeat(#{$i}, 1fr);
+                    }
+                    > .grid-cell
+                    {
+                        &.c#{$infix}-#{$i}
+                        {
+                            grid-column: span #{$i};
+                        }
+                    }
                 }
-                > .grid-cell
+            }
+            &.grid#{$infix}-auto
+            {
+                /* Rows */
+                grid-auto-rows: min-content;
+                grid-auto-columns: min-content;
+            }
+            &.grid-r#{$infix}-auto
+            {
+                /* Rows */
+                grid-auto-rows: min-content;
+            }
+            &.grid-c#{$infix}-auto
+            {
+                /* Columns */
+                grid-auto-columns: min-content;
+            }
+            > .grid-cell
+            {
+                &.r#{$infix}-full
                 {
-                    &.r#{$infix}-#{$i}
-                    {
-                        grid-row: span #{$i};
-                    }
-                    &.c#{$infix}-#{$i}
-                    {
-                        grid-column: span #{$i};
-                    }
+                    grid-row: span #{$rows};
+                }
+                &.c#{$infix}-full
+                {
+                    grid-column: span #{$cols};
                 }
             }
         }
@@ -49,12 +87,18 @@
 }
 .grid
 {
-    @include create-grid(12, 50px)
+    @include create-grid(12, 12, 50px);
 }
-.body-grid
+.list-grid
 {
     @include create-grid(1);
     grid-template-rows: min-content minmax(min-content, 100%) min-content;
+}
+.line-grid
+{
+    @include create-grid(5, 1);
+    grid-template-columns: repeat(auto-fill, minmax(150px, max-content));
+    grid-template-rows: min-content;
 }
 
 .form-grid {

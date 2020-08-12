@@ -23,11 +23,12 @@ final class RequestProvider
         $this->request = $request;
         if (! empty($request))
         {
-            //load routes
+            // load routes file
             if (file_exists($routeFile)) {
                 $result = require($routeFile);
                 if ($result instanceof IRequest)
                 {
+                    // if result is a returned request, overwrite other request;
                     $this->matchedRequest = $result;
                 }
             } else {

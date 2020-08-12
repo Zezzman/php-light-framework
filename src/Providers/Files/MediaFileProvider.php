@@ -17,6 +17,30 @@ class MediaFileProvider extends FileProvider
     const MAX_SIZE = 4000000;
     const EXTENSIONS = ['jpeg','jpg','png'];
     const MIME = ['image/jpeg', 'image/jpg', 'image/png'];
+
+    public static function temp($file)
+    {
+        if (! HTTPHelper::isFile($file) || ($_FILES[$file]['error'] !== 0)) {
+            return false;
+        }
+
+        // Get file
+        if (isset($_FILES[$file]['name'])
+        && isset($_FILES[$file]['tmp_name']))
+        {
+            $name = $_FILES[$file]['name'];
+            $path = $_FILES[$file]['tmp_name'];
+            if (self::checkFile($path)) {
+                $info = array_merge(pathinfo($name), ['tmp_path' => $path, 'mime' => mime_content_type($path)]);
+                $file = new FileModel($name, $info);
+                if (self::checkExtension($file->extension(), static::EXTENSIONS)
+                && self::checkType($file->type(), static::MIME))
+                {
+                    return $file;
+                }
+            }
+        }
+    }
     
     /**
      * Uploads File
@@ -34,16 +58,17 @@ class MediaFileProvider extends FileProvider
      */
     public static function upload($fileIndex, string $folder = '', $overwrite = false, string $customName = null, array $allowExtensions = [], $maxSize = 0)
     {
-        if (! config('PERMISSIONS.ALLOW_UPLOADS') || ! HTTPHelper::isFile($fileIndex) || ($_FILES[$fileIndex]['error'] !== 0)) {
+        // Get file
+        $file = self::temp($fileIndex);
+
+        if (! config('PERMISSIONS.ALLOW_UPLOADS') || $file === null) {
             return false;
         }
         $storagePath = config('PATHS.ROOT~STORAGE');
         if (empty($storagePath)) {
             return false;
         }
-
-        // Get file
-        $file = self::create($_FILES[$fileIndex]['name'] ?? '');
+        
         $name = $file->name();
         $ext = $file->extension();
 

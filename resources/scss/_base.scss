@@ -76,6 +76,11 @@ a.clean-link:focus
 /* Navbar */
 .navbar
 {
+    h1
+    {
+        margin: 0;
+        font-size: large;
+    }
     button.nav-button
     {
         display: block;

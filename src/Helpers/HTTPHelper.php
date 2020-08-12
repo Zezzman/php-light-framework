@@ -9,7 +9,7 @@ final class HTTPHelper
     /**
      * 
      */
-    public static function isGET(string $param = null)
+    public static function isGet(string $param = null)
     {
         if (is_array($_GET) && ! empty($_GET)) {
             if (! is_null($param)) {
@@ -49,11 +49,31 @@ final class HTTPHelper
     /**
      * 
      */
+    public static function isFile(string $param = null)
+    {
+        if (is_array($_FILES) && ! empty($_FILES)) {
+            if (! is_null($param)) {
+                if (((is_numeric($param) && $param >= 0)
+                || ! empty($param))
+                && isset($_FILES[$param])) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
+     * 
+     */
     public static function get(string $param = null)
     {
         $get = $_GET;
         if (! is_null($param)) {
-            if (self::isGET($param)) {
+            if (self::isGet($param)) {
                 return $get[$param];
             } else {
                 return false;
@@ -76,6 +96,22 @@ final class HTTPHelper
             }
         } else {
             return $post;
+        }
+    }
+    /**
+     * 
+     */
+    public static function file(string $param = null)
+    {
+        $file = $_FILES;
+        if (! is_null($param)) {
+            if (self::isFile($param)) {
+                return $file[$param];
+            } else {
+                return false;
+            }
+        } else {
+            return $file;
         }
     }
     /**

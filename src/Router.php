@@ -17,7 +17,7 @@ use Exception;
  */
 class Router
 {
-    public $request = null;
+    private $request = null;
     private $requestType = null;
     private $requestMethod = null;
     /**
@@ -27,16 +27,13 @@ class Router
     {
         $this->requestMethod = getenv('REQUEST_METHOD');
         $this->requestType = config('CLIENT_TYPE');
-
-        if ($this->requestType === 'webserver') {
-            $this->webRoutes();
-        } elseif ($this->requestType === 'api') {
-            $this->apiRoutes();
-        }  elseif ($this->requestType === 'cronjob') {
-            $this->cronjobRoutes();
-        } elseif ($this->requestType === 'cli') {
-            $this->cliRoutes();
-        }
+    }
+    /**
+     * 
+     */
+    public function request()
+    {
+        return $this->request;
     }
     /**
      * 
@@ -55,7 +52,7 @@ class Router
     /**
      * 
      */
-    private function webRoutes()
+    public function webRoutes()
     {
         // Client request
         $uri = HTTPHelper::URI();
@@ -63,11 +60,12 @@ class Router
         $provider = new RequestProvider('http', config('PATHS.ROOT~ROUTES') . 'web.php', $uri);
         // Find matching request
         $this->request = $provider->matchRequests();
+        return $this->request;
     }
     /**
      * 
      */
-    private function apiRoutes()
+    public function apiRoutes()
     {
         $uri = HTTPHelper::URI();
         $provider = new RequestProvider('http', config('PATHS.ROOT~ROUTES') . 'api.php', $uri);
@@ -76,11 +74,12 @@ class Router
             header("Access-Control-Max-Age: 3600");
         }
         $this->request = $provider->matchRequests();
+        return $this->request;
     }
     /**
      * 
      */
-    private function cliRoutes()
+    public function cliRoutes()
     {
         $commands = config('APP.ARGV');
         $provider = new CLIRequestProvider($commands);
@@ -91,24 +90,13 @@ class Router
             throw new Exception('CLI Route File Not Found');
         }
         $this->request = $provider->matchRequests($commands);
+        return $this->request;
     }
     /**
      * 
      */
-    private function cronjobRoutes()
+    public function cronjobRoutes()
     {
 
-    }
-    private function isAuth()
-    {
-        return AuthProvider::isAuthorized();
-    }
-    private function Referer()
-    {
-        return SessionProvider::get('refererURI');
-    }
-    private function RefererCode()
-    {
-        return SessionProvider::get('refererCode');
     }
 }

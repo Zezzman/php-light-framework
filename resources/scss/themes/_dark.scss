@@ -1,3 +1,5 @@
+@import 'theme_master';
+
 /* Sections */
 $default-color: $white;
 $default-bg: $blue-green;//$blue-dark;
@@ -51,9 +53,3 @@ $default-properties: (
     'link-color': inherit,
     'link-hover-color': $gray-800,
 ), $default-properties);
-
-/* Navbar */
-.navbar
-{
-    @extend .navbar-dark;
-}

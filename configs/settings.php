@@ -10,5 +10,7 @@ return [
         'LOG_ERRORS' => false,
         // Disable cache
         'NO_CACHE' => false,
+        // Use Minified Scripts and CSS
+        'MIN_SCRIPTS' => true
     ]
 ];
