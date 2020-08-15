@@ -8,3 +8,4 @@
 <script>var remoteDomain = "<?= config('LINKS.PUBLIC'); ?>";</script>
 <?= \System\Helpers\FileHelper::loadLinks(config('LAYOUT.HEADER.LINKS', [])); ?>
 <?= \System\Helpers\FileHelper::loadScripts(config('LAYOUT.HEADER.SCRIPTS', [])); ?>
+<?= (! empty(($bag['layout'] ?? ''))) ? "<style>" . (\System\Helpers\FileHelper::loadFile($bag['layout'])) . "</style>": ''; ?>

@@ -60,47 +60,44 @@ class View
         return $this->viewData[$name] ?? null;
     }
     /**
-     * 
+     * Get Bag Contents
      */
-    public function bag($changes = null, bool $save = true)
+    public function bag(array $changes = null)
     {
+        if (! is_null($this->currentView) && ! is_null($this->currentView->bag))
+        {
+            if (empty($changes ?? []))
+            {
+                return $this->currentView->bag;
+            }
+            else
+            {
+                return ArrayHelper::mergeRecursively($this->currentView->bag, $changes); // add additional items to view bag
+            }
+        }
+        return $changes;
+    }
+    /**
+     * Get Bag Contents
+     */
+    public function findInBag(string $key)
+    {
+        $bag = $this->bag();
+        $result = ArrayHelper::deepSearch($bag, strtoupper($key), '.');
+        return $result;
+    }
+    /**
+     * Add Items to Bag
+     */
+    public function addToBag(array $changes)
+    {
+        if (empty($changes) || is_null($this->currentView)) return;
+
         $bag = [];
-        if (! is_null($changes)
-        && ! empty($changes))
-        {
-            $changes = (array) $changes;
-            if (! is_null($this->currentView))
-            {
-                if (! is_null($this->currentView->bag)) {
-                    $bag = ArrayHelper::mergeRecursively($this->currentView->bag, $changes); // add additional items to view bag
-                }
-                else
-                {
-                    $bag = $changes;
-                }
-                if ($save == true)
-                {
-                    $this->currentView->bag = $bag;
-                }
-            }
-            else
-            {
-                $bag = $changes;
-            }
+        if (! is_null($this->currentView->bag)) {
+            $bag = ArrayHelper::mergeRecursively($this->currentView->bag, $changes); // add additional items to view bag
         }
-        else
-        {
-            if (! is_null($this->currentView)
-            && ! is_null($this->currentView->bag))
-            {
-                $bag = $this->currentView->bag;
-            }
-            else
-            {
-                $bag = [];
-            }
-        }
-        
+        $this->currentView->bag = $bag;
         return $bag;
     }
     /**
@@ -189,7 +186,7 @@ class View
         $controller = $this->controller ?? null;
         $viewData = $this->currentView ?? null;
         $model = $viewData->model ?? null;
-        $bag = $this->bag($bag, false);
+        $bag = $this->bag($bag);
         
         $path = FileHelper::secureRequiredPath($path);
         if (! empty($path)) {
@@ -246,9 +243,9 @@ class View
         $body = '';
         
         // render views
+        $this->addToBag(config('APP', null));
         foreach ($this->viewData as $view) {
             $this->currentView = $view;
-            $this->bag(config('APP', null));
             if (($viewContent = $this->loadFile($view->path)) !== false) {
                 $body .= $view->prepend . $viewContent . $view->append;
                 $hasView = true;
@@ -262,9 +259,9 @@ class View
         } else {
             // include body within layout
             $this->content = $body;
-            // $this->bag(['scripts' => [ ($this->layout) => ['path' => '../public/assets/javascript/' . $this->layout . '.js']]]);
+            $minify = config('SETTINGS.MIN_SCRIPTS', true);
             if (($layout = $this->loadFile('layouts/' . $this->layout . '.php', [
-                'style' => $style = FileHelper::loadFile('../public/assets/css/' . $this->layout . '.css')
+                'layout' => ('../public/assets/css/' . $this->layout . (($minify) ? '.min.css' : '.css'))
             ])) !== false)
             {
                 $this->hasRendered = true;

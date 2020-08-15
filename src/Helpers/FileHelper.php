@@ -15,16 +15,12 @@ final class FileHelper
     public static function loadFile(string $path, array $codes = null, array $defaults = [], bool $list = false, int $listLength = 0, bool $allowEmpty = false, bool $required = true)
     {
         $path = ($required)? self::secureRequiredPath($path): self::securePath($path);
-        if (file_exists($path) && is_file($path)) {
-            if (! is_null($codes)) {
-                $content = file_get_contents($path);
-                return QueryHelper::scanCodes($codes, $content, $defaults, $list, $listLength, $allowEmpty);
-            } else {
-                return file_get_contents($path);
-            }
-        } else {
-            return false;
-        }
+        if (! file_exists($path) || ! is_file($path)) return false;
+
+        if (is_null($codes)) return file_get_contents($path);
+
+        $content = file_get_contents($path);
+        return QueryHelper::scanCodes($codes, $content, $defaults, $list, $listLength, $allowEmpty);
     }
     /**
      * Encodes and Print Image into img tag
@@ -99,46 +95,49 @@ final class FileHelper
      */
     public static function loadScripts(array $scripts)
     {
+        if (empty($scripts)) return;
+        
         $html = '';
-        if (! empty($scripts)) {
-            $style = '<script {src} {async} {defer} {type} {charset}>{code}</script>';
+        $style = '<script {src} {async} {defer} {type} {charset}>{code}</script>';
+        $minify = config('SETTINGS.MIN_SCRIPTS', true);
+        foreach ($scripts as $script) {
+            if (is_string($script)) {
+                $script = ['src' => $script];
+            }
+            if (is_array($script)) {
+                // Declare variables
+                $code = ((isset($script['var']) && ! empty($script['var'])) ?
+                    QueryHelper::scanCodes($script['var'], 'var {KEY} = {VALUE};', [], true). "\n" : '');
+                // Append File Content
+                if (! empty($path = ($script['path'] ?? ''))
+                && (self::securePath($path) !== false || self::securePath($path .= (($minify) ? '.min.js': '.js') !== false))
+                && ($file = self::loadFile($path, null, [], false, 0, false, false)) !== false
+                && ! empty($file))
+                {
+                    $code = $code. "\n". $file;
+                }
+                // Append Code
+                $code .= ((! empty($script['code'] ?? '') && is_string($script['code'])) ? 
+                    $script['code'] : '');
 
-            foreach ($scripts as $script) {
-                if (is_string($script)) {
-                    $script = ['src' => $script];
+                if (! empty($script['src'] ?? '') && is_string($script['src']))
+                {
+                    $src = ((substr($script['src'], -3) == '.js') ?
+                        $script['src'] : $script['src'] . (($minify) ? '.min.js': '.js'));
                 }
-                if (is_array($script)) {
-                    // Required fields
-                    $script['async'] = (in_array('async', $script)) ? 'async' : '';
-                    $script['defer'] = (in_array('defer', $script)) ? 'defer' : '';
-                    $script['charset'] = $script['charset'] ?? '';
-                    $script['type'] = $script['type'] ?? '';
-                    $script['code'] = $script['code'] ?? '';
-                    $script['src'] = $script['src'] ?? '';
-                    // Format fields
-                    if ($script['src'] !== '') {
-                        $script['src'] = 'src="' . $script['src'] . '"';
-                    }
-                    if ($script['type'] !== '') {
-                        $script['type'] = 'type="' . $script['type'] . '"';
-                    }
-                    if ($script['charset'] !== '') {
-                        $script['charset'] = 'charset="' . $script['charset'] . '"';
-                    }
-                    if (isset($script['var']) && ! empty($script['var'])) {
-                        $script['code'] = QueryHelper::scanCodes($script['var'], 'var {KEY} = {VALUE};', [], true) . "\n" + $script['code'];
-                    }
-                    if (isset($script['path']) && ! empty($script['path'])) {
-                        if (($file = self::loadFile($script['path'], null, [], false, 0, false, false)) !== false)
-                        {
-                            if (! empty($file)) {
-                                $script['code'] .= $file;
-                            }
-                        }
-                    }
-                    // Create html
-                    $html .= QueryHelper::scanCodes($script, $style);
-                }
+                // Required fields
+                $params = [
+                    'async' => ((in_array('async', $script)) ? 'async' : ''),
+                    'defer' => ((in_array('defer', $script)) ? 'defer' : ''),
+                    'charset' => ((! empty(($script['charset'] ?? '')) && is_string($script['charset'])) ?
+                        ('charset="' . $script['charset'] . '"') : ''),
+                    'type' => ((! empty(($script['type'] ?? '')) && is_string($script['type'])) ?
+                        ('type="' . $script['type'] . '"') : ''),
+                    'code' => $code,
+                    'src' => ((! empty($src)) ? ('src="' . $src . '"') : ''),
+                ];
+                // Create html
+                $html .= QueryHelper::scanCodes($params, $style);
             }
         }
         return $html;

@@ -89,7 +89,7 @@ final class EnvironmentProvider
     private function getEnvironment()
     {
         $this->addEnvironment('default');
-        $env = getenv('APP_ENVIRONMENT');
+        $env = config('APP.ENVIRONMENT');
         if (! empty($env)) {
             $this->addEnvironment($env);
         }

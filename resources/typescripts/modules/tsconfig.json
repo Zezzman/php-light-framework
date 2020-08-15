@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "module": "System",
+        "target": "ES5",
+        "sourceMap": false,
+        "outFile": "../../../public/assets/javascript/bundle.js",
+    },
+}

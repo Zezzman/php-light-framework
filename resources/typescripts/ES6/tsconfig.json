@@ -3,7 +3,7 @@
         "module": "ES6",
         "target": "ES5",
         "sourceMap": false,
-        "outDir": "../../public/assets/javascript/",
+        "outDir": "../../../public/assets/javascript/",
     },
     "include": [
         "./**/*",

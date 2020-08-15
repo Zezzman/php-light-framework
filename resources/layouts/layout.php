@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<?= $this->header('header'); ?>
-<?php
-if (isset($bag['style']) && is_string($bag['style']))
-{
-    echo "<style>" . $bag['style'] . "</style>";
-}
-?>
+<?= $this->header('header', $bag); ?>
 </head>
 
 <body>
