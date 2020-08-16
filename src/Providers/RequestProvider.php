@@ -2,7 +2,9 @@
 namespace System\Providers;
 
 use System\Factories\RequestFactory;
+use System\Providers\SessionProvider;
 use System\Providers\AuthProvider;
+use System\Repositories\UserAuthRepository;
 use System\Interfaces\IRequest;
 use Exception;
 /**
@@ -16,6 +18,7 @@ final class RequestProvider
     private $request = null;
     private $matchedRequest = null;
     private $designatedRequests = [];
+    private $designatedRoutes = [];
 
     public function __construct(string $requestType, string $routeFile, string $uri)
     {
@@ -53,6 +56,55 @@ final class RequestProvider
 
         if (is_null($this->matchedRequest))
         {
+            $route = $this->request->route;
+            $routes = $this->designatedRoutes;
+            $matching = true;
+            while ($matching)
+            {
+                foreach ($route as $key => $value)
+                {
+                    if (isset($routes[$key]))
+                    {
+                        if (! is_object($routes[$key]))
+                        {
+                            $route = $value;
+                            $routes = $routes[$key];
+                            continue;
+                        }
+                        else
+                        {
+                            $request = $routes[$key];
+                            if ($this->request->requestMethod($request->method))
+                            {
+                                if (! $selectedRequest->valid())
+                                {
+                                    $request->triggerMatching();
+                                    $request->uri = $this->request->uri;
+                                    if ($request->valid()
+                                    && $request->triggerMatched())
+                                    {
+                                        $selectedRequest = $request;
+                                        $matching = false;
+                                        break;
+                                    }
+                                    $selectedRequest = $request;
+                                }
+                            }
+                        }
+                    }
+                    $matching = false;
+                }
+            }
+            $this->matchedRequest = $selectedRequest;
+        }
+        return $this->matchedRequest;
+    }
+    public function matchRequestModels()
+    {
+        $selectedRequest = RequestFactory::emptyHttpRequest();
+
+        if (is_null($this->matchedRequest))
+        {
             foreach ($this->designatedRequests as $key => $request)
             {
                 if ($this->request->matchRequest($request))
@@ -61,10 +113,10 @@ final class RequestProvider
                     {
                         if (! $selectedRequest->valid())
                         {
-                            $request->isMatching();
+                            $request->triggerMatching();
                             $request->uri = $this->request->uri;
                             if ($request->valid()
-                            && $request->isMatched())
+                            && $request->triggerMatched())
                             {
                                 $selectedRequest = $request;
                                 break;
@@ -84,7 +136,7 @@ final class RequestProvider
      */
     private function createRequest(string $method, string $requestString, string $actionString = '')
     {
-        $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request->route);
+        $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request->listed);
         if (config('PERMISSIONS.ALLOW_GUESTS') === false) {
             if ($this->isGuest())
             {
@@ -107,7 +159,7 @@ final class RequestProvider
     {
         $currentRequest = $this->createRequest(getenv('REQUEST_METHOD'), $match, $actionString);
         if (! is_null($currentRequest)) {
-            $this->designatedRequests[] = $currentRequest;
+            $this->designatedRoutes = array_merge_recursive($this->designatedRoutes, $currentRequest->route);
         }
         return $currentRequest;
     }
@@ -118,7 +170,7 @@ final class RequestProvider
     {
         $currentRequest = $this->createRequest('GET', $match, $actionString);
         if (! is_null($currentRequest)) {
-            $this->designatedRequests[] = $currentRequest;
+            $this->designatedRoutes = array_merge_recursive($this->designatedRoutes, $currentRequest->route);
         }
         return $currentRequest;
     }
@@ -129,7 +181,7 @@ final class RequestProvider
     {
         $currentRequest = $this->createRequest('POST', $match, $actionString);
         if (! is_null($currentRequest)) {
-            $this->designatedRequests[] = $currentRequest;
+            $this->designatedRoutes = array_merge_recursive($this->designatedRoutes, $currentRequest->route);
         }
         return $currentRequest;
     }
@@ -139,6 +191,24 @@ final class RequestProvider
     public function isAuth(int $access = -1)
     {
         return AuthProvider::isAuthorized($access);
+    }
+    /**
+     * Compare Login Token to Database Token
+     */
+    public function authCheck()
+    {
+        SessionProvider::startSession();
+        if (empty($username = SessionProvider::get('username'))) return false;
+        if (empty($session_token = SessionProvider::get('session_token'))) return false;
+
+        $repo = new UserAuthRepository();
+        $userData = $repo->getUserAuthWithUsername($username);
+        if (! $userData || $userData['session_token'] !== $token)
+        {
+            SessionProvider::destroySession();
+            return false;
+        }
+        return true;
     }
     /**
      * Only Allow Guests

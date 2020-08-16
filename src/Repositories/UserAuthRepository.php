@@ -58,4 +58,27 @@ class UserAuthRepository extends UserRepository
         $this->feedback('Required fields not provided', 0, 'Required');
         return false;
     }
+    /**
+     * 
+     */
+    public function updateSession(string $token){
+        if (is_null($this->connection())) {
+            $this->feedback('No database connection');
+            return false;
+        }
+        if (! $user->hasRequiredSignUpFields()) {
+            $this->mergeFeedback($user);
+            $this->feedback('Required fields not provided', 0, 'Required');
+            return false;
+        }
+        // add new user to database
+        $sql = "CALL sp_update_user_session(:token)";
+        $result = $this->connection()::prepare($sql, ['token' => $token,]);
+        
+        if ($result === false) {
+            $this->feedback('Failed to update session_token');
+            return false;
+        }
+        return true;
+    }
 }

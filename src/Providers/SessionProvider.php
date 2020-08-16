@@ -78,21 +78,21 @@ final class SessionProvider
     {
         if (empty($keyword))
         {
-            $this->token = $this->generateKey();
+            $this->token = self::generateKey();
         }
         else
         {
-            $this->token = $this->generateKeyword($keyword);
+            $this->token = self::generateKeyword($keyword);
         }
         $_SESSION['CSRF_token'] = $this->token;
     }
-    public function generateKey()
+    public static function generateKey()
     {
         return bin2hex(random_bytes(64));
     }
-    public function generateKeyword(string $keyword = '')
+    public static function generateKeyword(string $keyword = '')
     {
-        $time = new DateTime();
+        $time = new \DateTime();
         $key = ($time->format("Y-m-d H-i-s")). (trim($keyword));
         return bin2hex($key);
     }
@@ -127,14 +127,14 @@ final class SessionProvider
         if (! self::hasSession() || empty($_SESSION)) return false;
         if (is_null($key)) return true;
 
-        return (! (empty($key) && ! is_numeric($key)) && isset($_GET[$key]));
+        return (! (empty($key) && ! is_numeric($key)) && isset($_SESSION[$key]));
     }
     public static function get(string $key = null)
     {
-        if (is_null($param)) return $_SESSION;
-        if (! self::isGet($param)) return null;
+        if (is_null($key)) return $_SESSION;
+        if (! self::isGet($key)) return null;
         
-        return $_SESSION[$param];
+        return $_SESSION[$key];
     }
     public static function set(string $key, $value)
     {

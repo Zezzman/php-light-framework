@@ -11,16 +11,20 @@ use System\Helpers\HTTPHelper;
  */
 class HttpRequestModel extends RequestModel
 {
+    public $route = null;
+    public $listed = null;
+    public $size = 0;
+    public $expanding = false;
+
     public $uri = '';
     public $requestPattern = '';
-    public $route = null;
     public $method = '';
     public $redirect = null;
     public $view = null;
     public $model = null;
     public $settings = [];
-    public $onMatching = [];
-    public $onMatched = [];
+    
+    public $cachedLocation = null;
 
     /**
      *  Initiate a request
@@ -71,73 +75,36 @@ class HttpRequestModel extends RequestModel
         if (! isset($request->route)) {
             return false;
         }
-        return $this->matchRoutes($request->route);
-    }
-    /**
-     * Match routes
-     */
-    public function matchRoutes(array $route)
-    {
-        $route1 = $this->route;
-        $route2 = $route;
-        reset($route1);
-        reset($route2);
+        reset($this->route);
+        reset($request->route);
 
-        if (count($route1) === count($route2) || array_key_exists('append', $route2)) {
-            foreach ($route2 as $key => $value) {
-                $index = trim($value, '{}');
-                if ($key !== 'append' && $index === $value) {
-                    if (isset($route1[$key])) {
-                        if ($value !== $route1[$key]) {
+        if ($this->size === $request->size || $request->expanding) {
+            $matching = true;
+            $route1 = $this->route;
+            $route2 = $request->route;
+            while ($matching)
+            {
+                foreach ($route2 as $key => $value) {
+                    $index = trim($key, '{}');
+                    if ($index === $key) {
+                        if (! isset($route1[$key])) {
                             return false;
                         }
-                    } else {
-                        return false;
+                        if (! is_object($value)) {
+                            $route1 = $route1[$key];
+                            $route2 = $value;
+                            continue;
+                        }
                     }
+                    $matching = false;
                 }
             }
+            
             return true;
         }
         return false;
     }
-    /**
-     * On Matching Event
-     */
-    public function isMatching()
-    {
-        foreach ($this->onMatching as $action)
-        {
-            if (\is_callable($action))
-            {
-                if ($action() === false)
-                {
-                    $this->onMatching = [];
-                    return false;
-                }
-            }
-        }
-        $this->onMatching = [];
-        return true;
-    }
-    /**
-     * On Matched Event
-     */
-    public function isMatched()
-    {
-        foreach ($this->onMatched as $action)
-        {
-            if (\is_callable($action))
-            {
-                if ($action() === false)
-                {
-                    $this->onMatched = [];
-                    return false;
-                }
-            }
-        }
-        $this->onMatched = [];
-        return true;
-    }
+    
     /**
      * Search settings
      */
@@ -179,7 +146,7 @@ class HttpRequestModel extends RequestModel
         return $params;
     }
 
-    /* Matching Checks */
+    /* Matching Actions */
     /**
      * Set request parameters
      */
@@ -478,7 +445,7 @@ class HttpRequestModel extends RequestModel
         }
         return $this;
     }
-    /* Post-matching Checks */
+    /* Post-matching Actions */
     /**
      * Set request environment
      */
@@ -506,37 +473,34 @@ class HttpRequestModel extends RequestModel
         }
         return $this;
     }
+
+    /* Rendered Actions */
     /**
-     * Execute Function When Matching
+     * Output Static View to file
+     * 
      */
-    public function onMatching(\Closure $func, string $name = null)
+    public function output(string $file)
     {
         if ($this->valid()) {
-            if (! \is_null($name))
+            $this->onRendered[] = function () use ($file)
             {
-                $this->onMatching[$name] = $func;
-            }
-            else
-            {
-                $this->onMatching[] = $func;
-            }
+                
+            };
         }
         return $this;
     }
     /**
-     * Execute Function When Matched
+     * Output Static View to file
+     * and output new view at set refresh rate
+     * 
      */
-    public function onMatched(\Closure $func, string $name = null)
+    public function staticView(string $file, int $refreshRate)
     {
         if ($this->valid()) {
-            if (! \is_null($name))
+            $this->onRendered[] = function () use ($file, $refreshRate)
             {
-                $this->onMatching[$name] = $func;
-            }
-            else
-            {
-                $this->onMatching[] = $func;
-            }
+                
+            };
         }
         return $this;
     }

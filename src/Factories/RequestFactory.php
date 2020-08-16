@@ -67,9 +67,8 @@ class RequestFactory
         $request->uri = $requestString;
         $request->method = $method;
         $request->type = $type;
-        self::httpRouteMap($request, $requestString);
+        self::httpRouteMap($request, $requestString, $availableParams);
         self::controllerAction($request, $actionString);
-        self::setParams($request, $availableParams);
         return $request;
     }
     /**
@@ -82,23 +81,36 @@ class RequestFactory
     /**
      * 
      */
-    private static function httpRouteMap(HttpRequestModel $request, string $requestString)
+    private static function httpRouteMap(HttpRequestModel $request, string $requestString, array $availableParams = [])
     {
         // Route alias changes route matching
         $definedRoutes = [
-            '/' => [
-                'home',
-                'index'
-            ]
+            '/' => ['home', 'index']
         ];
 
-        $route = [];
+        $request->route = [];
         $requestString = preg_replace("/[&](.+)/", '', $requestString);
 
         // Set alias route
         foreach ($definedRoutes as $key => $value) {
             if (preg_match("#(^|\s)$key#", $requestString)) {
-                $request->route = $value;
+                $layout = [];
+                $layoutSize = 0;
+                for ($i = (count($value) - 1); $i >= 0; $i--) {
+                    $index = $value[$i];
+                    if ($i !== (count($value) - 1))
+                    {
+                        $layout = [$index => $layout];
+                        $layoutSize++;
+                    }
+                    else
+                    {
+                        $layout = [$index => $request];
+                        $layoutSize++;
+                    }
+                }
+                $request->route = (array) $layout;
+                $request->listed = $value;
                 return;
             }
         }
@@ -106,18 +118,45 @@ class RequestFactory
         if (! empty($requestString)) {
             // map route
             $params = explode('/', $requestString);
-            for ($i = 0; $i < count($params); $i++) {
+            $paramSize = count($params);
+            $layout = [];
+            $layoutSize = 0;
+            for ($i = ($paramSize - 1); $i >= 0; $i--) {
                 $value = $params[$i];
-                $route[] = trim($value, '.');
-                if ($i === count($params) - 1) {
-                    if (strpos($value, '...') !== false) {
-                        $route['append'] = trim($value, '.');
+                if (empty($value)) continue; 
+                $index = trim($value, '.');
+                if ((strpos($index, '{')) !== false) {
+                    $index = trim($index, '{}');
+                    // self::setParam($request, $index);
+                    if (substr($value, -3) === '...') {
+                        $items = array_slice($availableParams, ($i + 1));
+                        $request->params[$index] = $items;
+                        $request->expanding = true;
+                    }
+                    else
+                    {
+                        if (isset($availableParams[$i])) {
+                            $request->params[$index] = $availableParams[$i];
+                        } else {
+                            $request->params[$index] = '';
+                        }
                     }
                 }
+                if ($i !== ($paramSize - 1))
+                {
+                    $layout = [$index => $layout];
+                    $layoutSize++;
+                }
+                else
+                {
+                    $layout = [$index => $request];
+                    $layoutSize++;
+                }
             }
+            $request->route = (array) $layout;
+            $request->listed = $params;
+            $request->size = $layoutSize;
         }
-        
-        $request->route = $route;
     }
     /**
      * 
@@ -146,20 +185,19 @@ class RequestFactory
      */
     public static function setParams(HttpRequestModel $request, array $availableParams = [])
     {
-        // clean request parameters
-        $request->params = [];
-
         // Get parameters for requestPattern
         if (strpos($request->requestPattern, '{') !== false) {
-            $params = [];
             $routes = $request->route;
             $matches = array_values($routes);
             $matchLength = count($matches);
             $append = null;
-            if (isset($routes['append'])) {
-                $append = $routes['append'];
+            if (isset($request->params['append'])) {
+                $append = $request->params['append'];
                 $matchLength--;
             }
+            // clean request parameters
+            $params = [];
+            $request->params = [];
             for ($i = 0; $i < $matchLength; $i++) {
                 $match = $matches[$i];
                 $index = trim($match, '{}');

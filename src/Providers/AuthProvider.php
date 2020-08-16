@@ -132,14 +132,17 @@ final class AuthProvider
 
     private function authorize(IUserAuth $user, int $days = null)
     {
-        // log user in with new session
         $username = $user->username;
-        SessionProvider::resetSession($days, $username);
-        if (SessionProvider::set('username', $username)) {
-            $token = SessionProvider::token();
+        $token = SessionProvider::generateKeyword($user->username);
+        // log user in with new session
+        SessionProvider::resetSession($days);
+        if (SessionProvider::set('username', $username)
+        && SessionProvider::set('session_token', $token)) {
             // Update database login token
-            return true;
+            $repo = new UserAuthRepository();
+            return $repo->updateSession($token);
         } else {
+            SessionProvider::destroySession();
             throw new RespondException(500, 'No active session');
         }
     }
@@ -159,18 +162,15 @@ final class AuthProvider
     /**
      * Compare Login Token to Database Token
      */
-    public function authCheck(IUserAuth $user)
+    public function authCheck()
     {
         SessionProvider::startSession();
         if (empty($username = SessionProvider::get('username'))) return false;
-        if (empty($token = SessionProvider::token())) return false;
+        if (empty($session_token = SessionProvider::get('session_token'))) return false;
 
         $repo = new UserAuthRepository();
-        // locate session within database that match username
         $userData = $repo->getUserAuthWithUsername($username);
-        // $userToken = $repo->findUserToken()
-        // check if the (time and username base) token is similar to $token
-        if ($userData['session_token'] !== $token)
+        if (! $userData || $userData['session_token'] !== $token)
         {
             SessionProvider::destroySession();
             return false;

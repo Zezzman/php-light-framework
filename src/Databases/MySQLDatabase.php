@@ -5,6 +5,7 @@ use System\Interfaces\IDatabase;
 use System\Controller;
 use PDO;
 use PDOException;
+use System\Models\SecretModel;
 use System\Exceptions\RespondException;
 /**
  *
@@ -46,7 +47,8 @@ class MySQLDatabase implements IDatabase
             $host = $config['HOST'];
             $dbName = $config['DATABASE_NAME'];
             $username = $config['USERNAME'];
-            $password = $config['PASSWORD'];
+            $password = (($config['PASSWORD'] instanceof SecretModel) ?
+                $config['PASSWORD']->index(0): $config['PASSWORD']);
             
             // Connect to database
             $db = new PDO("mysql:host=$host;dbname=$dbName", $username, $password);

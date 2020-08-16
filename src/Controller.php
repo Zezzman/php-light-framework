@@ -87,9 +87,11 @@ class Controller implements IController
     {
         if ($this->view instanceof \System\View)
         {
+            $this->getRequest()->triggerProcessed();
             if (($content = $this->view->render()) !== false)
             {
                 echo $content;
+                $this->getRequest()->triggerRendered();
                 return true;
             }
         }
