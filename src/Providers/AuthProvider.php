@@ -22,146 +22,122 @@ final class AuthProvider
     {
         $repo = new UserAuthRepository();
         $user = $repo->getUserAuthWithUsername($username);
-        if (is_array($user)) {
-            if (isset($user['password'])) {
-                return $user['password'];
-            } else {
-                $this->feedback('No password found');
-                return false;
-            }
-        } else {
+        if (! is_array($user))
+        {
             $this->mergeFeedback($repo);
             return false;
         }
+        if (! isset($user['password'])) {
+            $this->feedback('No password found');
+            return false;
+        }
+        return $user['password'];
     }
 
-    public function getLoginAuth()
-    {
-        $data = $this->getLoginPost();
-        if (is_array($data)) {
-            $user = new UserAuthModel();
-            $user->username = $data['username'];
-            $user->password = $data['password'];
-            return $user;
-        }
-        return false;
-    }
-    private function getLoginPost()
+    /**
+     * Get Login Details From Post
+     */
+    public function getLoginPostAuth()
     {
         // Get Post Authorization details
-        $post = HTTPHelper::post();
-        if (is_array($post)) {
-            $post = DataCleanerHelper::cleanArray($post);
-            return $post;
+        $data = DataCleanerHelper::cleanArray(HTTPHelper::post());
+        if (! is_array($data)) {
+            $this->feedback('No post data');
+            return false;
         }
-        $this->feedback('No post data');
-        return false;
+        
+        $user = new UserAuthModel();
+        $user->username = $data['username'];
+        $user->password = $data['password'];
+        return $user;
     }
     public function verifyLoginAuth(IUserAuth $user)
     {
-        if ($user->hasRequiredLoginFields()) {
-            $username = $user->username;
-            $password = $user->password;
-            $hashPassword = $this->getUserPasswordWithUsername($username);
-            if (is_string($hashPassword) && ! empty($hashPassword)) {
-                if (password_verify($password, $hashPassword)) {
-                    return true;
-                } else {
-                    $this->feedback('Incorrect password', 0, 'Password');
-                    return false;
-                }
-            } else {
-                $this->feedback('Invalid Hash format', 1, 'HashPassword');
-                return false;
-            }
-        } else {
+        if (! $user->hasRequiredLoginFields())
+        {
             $this->mergeFeedback($user);
             return false;
         }
-    }
-    public function loginAuth(IUserAuth $user)
-    {
-        if ($this->authorize($user)){
-            return true;
-        } else {
+        $username = $user->username;
+        $password = $user->password;
+        $hashPassword = $this->getUserPasswordWithUsername($username);
+        if (! is_string($hashPassword) || empty($hashPassword))
+        {
+            $this->feedback('Invalid Hash format', 1, 'HashPassword');
             return false;
         }
+        if (! password_verify($password, $hashPassword))
+        {
+            $this->feedback('Incorrect password', 0, 'Password');
+            return false;
+        }
+        return true;
+    }
+    public function loginAuth(IUserAuth $user, int $day = null)
+    {
+        return $this->authorize($user, $days);
     }
 
-    public function getSignUpAuth()
+    /**
+     * Get SignUp Details From Post
+     */
+    public function getSignUpPostAuth()
     {
-        // get post data
-        $data = $this->getSignUpPost();
-        if (is_array($data)) {
-            // generate model
-            $user = new UserAuthModel();
-            $user->username = $data['username']?? null;
-            $user->password = $data['password']?? null;
-            $user->email = $data['email']?? null;
-            $user->firstName = $data['first_name']?? null;
-            $user->lastName = $data['last_name']?? null;
-            return $user;
+        $data = DataCleanerHelper::cleanArray(HTTPHelper::post());
+        if (! is_array($data)) {
+            $this->feedback('No post data');
+            return false;
         }
-        return false;
-    }
-    private function getSignUpPost()
-    {
-        // Get Post Authorization details
-        $post = HTTPHelper::post();
-        if (is_array($post)) {
-            $post = DataCleanerHelper::cleanArray($post);
-            // Hash Password field
-            if (isset($post['password'])) {
-                $post['password'] = password_hash($post['password'], PASSWORD_DEFAULT);
-            }
-            return $post;
-        }
-        $this->feedback('No post data');
-        return false;
+        
+        $user = new UserAuthModel();
+        $user->username = $data['username'] ?? null;
+        $user->password = password_hash(($data['password'] ?? ''), PASSWORD_DEFAULT);
+        $user->email = $data['email'] ?? null;
+        $user->firstName = $data['first_name'] ?? null;
+        $user->lastName = $data['last_name'] ?? null;
+        return $user;
     }
     public function verifySignUpAuth(IUserAuth $user)
     {
-        if ($user->hasRequiredSignUpFields()) {
-            $repo = new UserAuthRepository();
-            if (! $repo->uniqueUsername($user->username)) {
-                $this->feedback('Username is not unique', 0, 'Username');
-                return false;
-            }
-            if (! $repo->uniqueEmail($user->email)) {
-                $this->feedback('Email is not unique', 0, 'Email');
-                return false;
-            }
-            return true;
-        } else {
+        if (! $user->hasRequiredSignUpFields()) {
             $this->mergeFeedback($user);
             return false;
         }
+        $repo = new UserAuthRepository();
+        if (! $repo->uniqueUsername($user->username)) {
+            $this->feedback('Username is not unique', 0, 'Username');
+            return false;
+        }
+        if (! $repo->uniqueEmail($user->email)) {
+            $this->feedback('Email is not unique', 0, 'Email');
+            return false;
+        }
+        return true;
     }
     public function signUpAuth(IUserAuth $user)
     {
-        if ($this->createUser($user)) {
-            // login
-            if ($this->authorize($user)){
-                return true;
-            }
-        }
-        return false;
+        if (! $this->createUser($user)) return false;
+
+        return $this->authorize($user);
     }
     private function createUser(IUserAuth $user)
     {
         $repo = new UserAuthRepository();
-        if ($repo->addUser($user)) {
-            return $user;
+        if (! $repo->addUser($user)) {
+            $this->mergeFeedback($repo);
+            return false;
         }
-        $this->mergeFeedback($repo);
-        return false;
+        return $user;
     }
 
-    private function authorize(IUserAuth $user)
+    private function authorize(IUserAuth $user, int $days = null)
     {
         // log user in with new session
-        SessionProvider::resetSession();
-        if (SessionProvider::set('username', $user->username)) {
+        $username = $user->username;
+        SessionProvider::resetSession($days, $username);
+        if (SessionProvider::set('username', $username)) {
+            $token = SessionProvider::token();
+            // Update database login token
             return true;
         } else {
             throw new RespondException(500, 'No active session');
@@ -175,16 +151,31 @@ final class AuthProvider
     public static function isAuthorized(int $access = -1)
     {
         SessionProvider::startSession();
-        if (SessionProvider::hasSession()) {
-            if (isset($_SESSION['username'])) {
-                if ($access > -1) {
-                    return isset($_SESSION['access_level']) 
-                        && $_SESSION['access_level'] === $access;
-                }
-                return true;
-            }
+        if (SessionProvider::hasSession()) return false;
+        if ($access <= -1) return true;
+
+        return (isset($_SESSION['access_level']) && $_SESSION['access_level'] === $access);
+    }
+    /**
+     * Compare Login Token to Database Token
+     */
+    public function authCheck(IUserAuth $user)
+    {
+        SessionProvider::startSession();
+        if (empty($username = SessionProvider::get('username'))) return false;
+        if (empty($token = SessionProvider::token())) return false;
+
+        $repo = new UserAuthRepository();
+        // locate session within database that match username
+        $userData = $repo->getUserAuthWithUsername($username);
+        // $userToken = $repo->findUserToken()
+        // check if the (time and username base) token is similar to $token
+        if ($userData['session_token'] !== $token)
+        {
+            SessionProvider::destroySession();
+            return false;
         }
-        return false;
+        return true;
     }
     public static function signOut()
     {

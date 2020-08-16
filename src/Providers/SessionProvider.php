@@ -28,19 +28,20 @@ final class SessionProvider
             self::$instance = $instance;
         }
     }
-    public static function setupSession(bool $newToken = false)
+    public static function setupSession(bool $newToken = false, string $keyword = '')
     {
         if (self::hasSession()) {
             $instance = &self::$instance;
-            if($newToken) {
-                $instance->generateToken();
-            } elseif (isset($_SESSION['CSRF_token'])) {
+            if (! $newToken && isset($_SESSION['CSRF_token'])) {
                 $instance->token = $_SESSION['CSRF_token'];
             }  else {
-                $instance->generateToken();
+                $instance->generateToken($keyword);
             }
         }
     }
+    /**
+     * Clear Session
+     */
     public static function closeSession()
     {
         if (isset(self::$instance)) {
@@ -48,11 +49,13 @@ final class SessionProvider
         }
         if (self::hasSession()) {
             session_unset();
-            // session_destroy();
             return true;
         }
         return false;
     }
+    /**
+     * Destroy Session
+     */
     public static function destroySession()
     {
         if (isset(self::$instance)) {
@@ -63,23 +66,38 @@ final class SessionProvider
         }
         session_destroy();
     }
-    public static function resetSession(int $days = null)
+    public static function resetSession(int $days = null, string $keyword = '')
     {
-        self::startSession();
+        // self::startSession();
         self::closeSession();
         self::startSession($days);
         session_regenerate_id();
-        self::setupSession();
+        self::setupSession(false, $keyword);
     }
-    private function generateToken()
+    private function generateToken(string $keyword = '')
     {
-        $this->token = $this->generateKey();
+        if (empty($keyword))
+        {
+            $this->token = $this->generateKey();
+        }
+        else
+        {
+            $this->token = $this->generateKeyword($keyword);
+        }
         $_SESSION['CSRF_token'] = $this->token;
     }
-    private function generateKey(){
+    public function generateKey()
+    {
         return bin2hex(random_bytes(64));
     }
-    private function sessionLife(int $days){
+    public function generateKeyword(string $keyword = '')
+    {
+        $time = new DateTime();
+        $key = ($time->format("Y-m-d H-i-s")). (trim($keyword));
+        return bin2hex($key);
+    }
+    private function sessionLife(int $days)
+    {
         if (! self::hasSession()) {
             $seconds = (60 * 60 * 24 * $days);
             ini_set('session.cookie_lifetime', $seconds);
@@ -100,73 +118,56 @@ final class SessionProvider
         self::startSession();
         return $_SESSION;
     }
-    public static function get(string $key = null)
+    /**
+     * 
+     */
+    public static function isGet(string $key = null)
     {
         self::startSession();
-        if (self::hasSession()
-        && ! empty($_SESSION)) {
-            if (! is_null($key)) {
-                if (((is_numeric($key) && $key >= 0)
-                || ! empty($key))
-                && isset($_SESSION[$key])) {
-                    return $_SESSION[$key];
-                } else {
-                    return null;
-                }
-            } else {
-                return $_SESSION;
-            }
-        }
-        return null;
+        if (! self::hasSession() || empty($_SESSION)) return false;
+        if (is_null($key)) return true;
+
+        return (! (empty($key) && ! is_numeric($key)) && isset($_GET[$key]));
+    }
+    public static function get(string $key = null)
+    {
+        if (is_null($param)) return $_SESSION;
+        if (! self::isGet($param)) return null;
+        
+        return $_SESSION[$param];
     }
     public static function set(string $key, $value)
     {
         self::startSession();
-        if (self::hasSession()) {
-            $_SESSION[$key] = $value;
-            return true;
-        }
-        return false;
+        if (! self::hasSession()) return false;
+
+        $_SESSION[$key] = $value;
+        return true;
     }
     public static function unset()
     {
         $keys = func_get_args();
-        if (is_array($keys) && ! empty($keys)) {
-            self::startSession();
-            if (self::hasSession()) {
-                foreach ($keys as $key) {
-                    if (is_string($key) && ! empty($key)
-                    && isset($_SESSION[$key])) {
-                        unset($_SESSION[$key]);
-                    }
-                }
+        if (! is_array($keys) || empty($keys)) return false;
+        self::startSession();
+        if (! self::hasSession()) return false;
+
+        foreach ($keys as $key) {
+            if (is_string($key) && ! empty($key)
+            && isset($_SESSION[$key])) {
+                unset($_SESSION[$key]);
             }
         }
-        
-        
-        return false;
+        return true;
     }
     public static function compareToken($token)
     {
-        if (! is_null($token)
-        && ! is_array($token)
-        && ! is_object($token)) {
-            if (! is_null(self::token())) {
-                return hash_equals(self::token(), $token);
-            }
-        }
+        if (empty($token) || is_array($token) || is_object($token)) return false;
+
+        if (! is_null(self::token())) return hash_equals(self::token(), $token);
         return false;
     }
     public static function comparePost()
     {
-        $token = HTTPHelper::post('csrf_token');
-        if (! is_null($token)
-        && ! is_array($token)
-        && ! is_object($token)) {
-            if (! is_null(self::token())) {
-                return hash_equals(self::token(), $token);
-            }
-        }
-        return false;
+        return self::compareToken(HTTPHelper::post('csrf_token'));
     }
 }

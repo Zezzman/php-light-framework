@@ -18,7 +18,7 @@ class UserAuthRepository extends UserRepository
             return false;
         }
 
-        $sql = "SELECT username, password"
+        $sql = "SELECT username, password, session_token"
                 ." FROM vw_users_auth"
                 ." WHERE username LIKE :username";
         $result = $this->connection()::prepare($sql, ['username' => $username], \PDO::FETCH_ASSOC);

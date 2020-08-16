@@ -17,17 +17,16 @@ final class DataCleanerHelper
      */
     public static function cleanValue($data)
     {
-        $cleanData = '';
-        if (is_string($data) || is_numeric($data)) {
-            $cleanData = trim($data);
-            $cleanData = trim($cleanData, '/');
-
-            $cleanData = htmlspecialchars($cleanData);
-            $cleanData = strip_tags($cleanData);
-            if (get_magic_quotes_gpc()) {
-                $cleanData = stripslashes($cleanData);
-            }
+        if (empty($data) || ! (is_string($data) || is_numeric($data))) return '';
+        
+        $cleanData = trim($data);
+        $cleanData = trim($cleanData, '/');
+        $cleanData = htmlspecialchars($cleanData);
+        $cleanData = strip_tags($cleanData);
+        if (get_magic_quotes_gpc()) {
+            $cleanData = stripslashes($cleanData);
         }
+
         return $cleanData;
     }
     /**
@@ -37,9 +36,24 @@ final class DataCleanerHelper
      * 
      * @return	string	clean array
      */
-    public static function cleanArray(array $data)
+    public static function cleanArray(array $data, int $depth = 0)
     {
-        return $data;
+        if (empty($data)) return [];
+
+        $cleanData = [];
+        $depth--;
+        foreach ($data as $key => $item)
+        {
+            if (is_string($data) || is_numeric($data))
+            {
+                $cleanData[$key] = self::cleanValue($item);
+            }
+            else if ($depth >= 0)
+            {
+                $cleanData[$key] = self::cleanArray($item, $depth);
+            }
+        }
+        return $cleanData;
     }
     /**
      * Clean string
@@ -50,6 +64,8 @@ final class DataCleanerHelper
      */
     public static function cleanEmail($email)
     {
+        if(is_array($email) || is_object($email)) return '';
+        
         $tags = [
             'content-type',
             'bcc:',
@@ -58,14 +74,10 @@ final class DataCleanerHelper
             'href',
             'src='
         ];
-        $cleanData = '';
-        if(!is_array($email) && !is_object($email)){
-            $cleanData = trim($email);
-            $cleanData = trim($cleanData, '/');
-            
-            $cleanData = str_replace($tags, '', $cleanData);
-            $cleanData = htmlspecialchars($cleanData);
-        }
+        $cleanData = trim($email);
+        $cleanData = trim($cleanData, '/');
+        $cleanData = str_replace($tags, '', $cleanData);
+        $cleanData = htmlspecialchars($cleanData);
         return $cleanData;
     }
     /**
@@ -78,11 +90,10 @@ final class DataCleanerHelper
      */
     public static function cleanSpaces($data, $replacer = '%20')
     {
-        $cleanData = '';
-        if (is_string($data) || is_numeric($data)) {
-            $cleanData = trim($data);
-            $cleanData = preg_replace('/[ ]/', $replacer, $data);
-        }
+        if (! (is_string($data) || is_numeric($data))) return '';
+
+        $cleanData = trim($data);
+        $cleanData = preg_replace('/[ ]/', $replacer, $data);
         return $cleanData;
     }
      /**
@@ -106,28 +117,28 @@ final class DataCleanerHelper
      */
     public static function dataMap(string $data, string $separator = ' ', Closure $callback = null, int $count = 0, int $start = 0)
     {
-        $result = '';
-        if (! empty($data)) {
-            $data = trim($data);
-            $data = trim($data, $separator);
-            $sections = explode($separator, $data);
-            if (is_null($callback)) {
-                $callback = function ($result, $item, $separator, $index) {
-                    return $result . $item . $separator;
-                };
-            }
-            $start = ($start < 0) ? count($sections) + $start : $start;
-            $count = ($count < 0)? count($sections) - $start + $count : (($count > 0) ? $count : count($sections) - $start);
+        if (empty($data)) return '';
 
-            for ($i = $start; $i < count($sections); $i++) {
-                $count--;
-                if ($count >= 0) {
-                    $result = $callback($result, $sections[$i], $separator, $i);
-                } else {
-                    break;
-                }
+        $data = trim($data);
+        $data = trim($data, $separator);
+        $sections = explode($separator, $data);
+        if (is_null($callback)) {
+            $callback = function ($result, $item, $separator, $index) {
+                return $result . $item . $separator;
+            };
+        }
+        $start = ($start < 0) ? count($sections) + $start : $start;
+        $count = ($count < 0)? count($sections) - $start + $count : (($count > 0) ? $count : count($sections) - $start);
+
+        $mapResult = ''; throw new Exception('UB');
+        for ($i = $start; $i < count($sections); $i++) {
+            $count--;
+            if ($count >= 0) {
+                $mapResult = $callback($mapResult, $sections[$i], $separator, $i);
+            } else {
+                break;
             }
         }
-        return $result;
+        return $mapResult;
     }
 }
