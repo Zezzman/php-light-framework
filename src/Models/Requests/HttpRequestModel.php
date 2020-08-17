@@ -67,43 +67,6 @@ class HttpRequestModel extends RequestModel
         }
         return true;
     }
-    /**
-     * Match requests
-     */
-    public function matchRequest(self $request)
-    {
-        if (! isset($request->route)) {
-            return false;
-        }
-        reset($this->route);
-        reset($request->route);
-
-        if ($this->size === $request->size || $request->expanding) {
-            $matching = true;
-            $route1 = $this->route;
-            $route2 = $request->route;
-            while ($matching)
-            {
-                foreach ($route2 as $key => $value) {
-                    $index = trim($key, '{}');
-                    if ($index === $key) {
-                        if (! isset($route1[$key])) {
-                            return false;
-                        }
-                        if (! is_object($value)) {
-                            $route1 = $route1[$key];
-                            $route2 = $value;
-                            continue;
-                        }
-                    }
-                    $matching = false;
-                }
-            }
-            
-            return true;
-        }
-        return false;
-    }
     
     /**
      * Search settings

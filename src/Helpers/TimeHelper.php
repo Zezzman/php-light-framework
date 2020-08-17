@@ -47,27 +47,29 @@ final class TimeHelper
      * 
      * @return      self        date instance
      */
-    public static function elapse()
+    public static function createMicro()
     {
         $timer = self::create();
         $timer->microtime = microtime(true);
         return $timer;
     }
     /**
-     * Capture elapsed microtime
+     * time elapse
      * 
-     * @return      int        elapsed microtime
+     * @return      self        date instance
      */
-    public function capture(bool $reset = false)
+    public function elapse(bool $reset = false)
     {
-        if (is_numeric($this->microtime)) {
-            $elapseTime = (microtime(true) - $this->microtime);
-            if($reset){
-                $this->microtime = microtime(true);
-            }
-            return $elapseTime;
+        if (! is_numeric($this->microtime))
+        {
+            $this->microtime = microtime(true);
         }
-        return -1;
+
+        $elapseTime = (microtime(true) - $this->microtime);
+        if($reset){
+            $this->microtime = microtime(true);
+        }
+        return $elapseTime;
     }
     /**
      * DateTime instance

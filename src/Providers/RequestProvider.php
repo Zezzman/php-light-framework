@@ -50,56 +50,8 @@ final class RequestProvider
     {
         return $this->request;
     }
+    
     public function matchRequests()
-    {
-        $selectedRequest = RequestFactory::emptyHttpRequest();
-
-        if (is_null($this->matchedRequest))
-        {
-            $route = $this->request->route;
-            $routes = $this->designatedRoutes;
-            $matching = true;
-            while ($matching)
-            {
-                foreach ($route as $key => $value)
-                {
-                    if (isset($routes[$key]))
-                    {
-                        if (! is_object($routes[$key]))
-                        {
-                            $route = $value;
-                            $routes = $routes[$key];
-                            continue;
-                        }
-                        else
-                        {
-                            $request = $routes[$key];
-                            if ($this->request->requestMethod($request->method))
-                            {
-                                if (! $selectedRequest->valid())
-                                {
-                                    $request->triggerMatching();
-                                    $request->uri = $this->request->uri;
-                                    if ($request->valid()
-                                    && $request->triggerMatched())
-                                    {
-                                        $selectedRequest = $request;
-                                        $matching = false;
-                                        break;
-                                    }
-                                    $selectedRequest = $request;
-                                }
-                            }
-                        }
-                    }
-                    $matching = false;
-                }
-            }
-            $this->matchedRequest = $selectedRequest;
-        }
-        return $this->matchedRequest;
-    }
-    public function matchRequestModels()
     {
         $selectedRequest = RequestFactory::emptyHttpRequest();
 
@@ -107,22 +59,14 @@ final class RequestProvider
         {
             foreach ($this->designatedRequests as $key => $request)
             {
-                if ($this->request->matchRequest($request))
+                if ($this->request->requestMethod($request->method))
                 {
-                    if ($this->request->requestMethod($request->method))
+                    if (! $selectedRequest->valid() || $request->size > $selectedRequest->size)
                     {
-                        if (! $selectedRequest->valid())
-                        {
-                            $request->triggerMatching();
-                            $request->uri = $this->request->uri;
-                            if ($request->valid()
-                            && $request->triggerMatched())
-                            {
-                                $selectedRequest = $request;
-                                break;
-                            }
-                            $selectedRequest = $request;
-                        }
+                        $request->triggerMatching();
+                        $request->uri = $this->request->uri;
+                        $request->triggerMatched();
+                        $selectedRequest = $request;
                     }
                 }
             }
@@ -136,8 +80,8 @@ final class RequestProvider
      */
     private function createRequest(string $method, string $requestString, string $actionString = '')
     {
-        $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request->listed);
-        if (config('PERMISSIONS.ALLOW_GUESTS') === false) {
+        $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request, $this->designatedRoutes);
+        if (! is_null($currentRequest) && config('PERMISSIONS.ALLOW_GUESTS') === false) {
             if ($this->isGuest())
             {
                 if ($currentRequest->settings('AUTH.GUEST.VISIBLE_RESTRICTIONS', true) === true)
@@ -159,7 +103,7 @@ final class RequestProvider
     {
         $currentRequest = $this->createRequest(getenv('REQUEST_METHOD'), $match, $actionString);
         if (! is_null($currentRequest)) {
-            $this->designatedRoutes = array_merge_recursive($this->designatedRoutes, $currentRequest->route);
+            $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;
     }
@@ -170,7 +114,7 @@ final class RequestProvider
     {
         $currentRequest = $this->createRequest('GET', $match, $actionString);
         if (! is_null($currentRequest)) {
-            $this->designatedRoutes = array_merge_recursive($this->designatedRoutes, $currentRequest->route);
+            $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;
     }
@@ -181,7 +125,7 @@ final class RequestProvider
     {
         $currentRequest = $this->createRequest('POST', $match, $actionString);
         if (! is_null($currentRequest)) {
-            $this->designatedRoutes = array_merge_recursive($this->designatedRoutes, $currentRequest->route);
+            $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;
     }

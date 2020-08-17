@@ -81,24 +81,24 @@ final class Launcher
     public function getRequest()
     {
         if ($this->router->type() === 'webserver') {
-            $this->getWebRequest();
+            return $this->getWebRequest();
         } elseif ($this->router->type() === 'api') {
-            $this->getAPIRequest();
+            return $this->getAPIRequest();
         } elseif ($this->router->type() === 'cli') {
-            $this->getCLIRequest();
+            return $this->getCLIRequest();
         }
     }
     public function getWebRequest()
     {
-        $this->router->webRoutes();
+        return $this->router->webRoutes();
     }
     public function getAPIRequest()
     {
-        $this->router->apiRoutes();
+        return $this->router->apiRoutes();
     }
     public function getCLIRequest()
     {
-        $this->router->cliRoutes();
+        return $this->router->cliRoutes();
     }
     /**
      * Run app with request provided to from client

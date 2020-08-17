@@ -75,7 +75,7 @@ abstract class RequestModel implements IRequest
         {
             if (\is_callable($action))
             {
-                if ($action() === false)
+                if ($action($this) === false)
                 {
                     $this->onMatching = [];
                     return false;
@@ -94,7 +94,7 @@ abstract class RequestModel implements IRequest
         {
             if (\is_callable($action))
             {
-                if ($action() === false)
+                if ($action($this) === false)
                 {
                     $this->onMatched = [];
                     return false;
@@ -113,7 +113,7 @@ abstract class RequestModel implements IRequest
         {
             if (\is_callable($action))
             {
-                if ($action() === false)
+                if ($action($this) === false)
                 {
                     $this->onProcessed = [];
                     return false;
@@ -132,7 +132,7 @@ abstract class RequestModel implements IRequest
         {
             if (\is_callable($action))
             {
-                if ($action() === false)
+                if ($action($this) === false)
                 {
                     $this->onRendered = [];
                     return false;
