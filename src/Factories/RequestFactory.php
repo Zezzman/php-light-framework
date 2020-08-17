@@ -106,38 +106,6 @@ class RequestFactory
         $layoutSize = 0;
         $layout = [];
         $entry = &$layout;
-        /* for ($i = ($paramSize - 1); $i >= 0; $i--) {
-            $value = $params[$i];
-            if (empty($value)) continue; 
-            $index = trim($value, '.');
-            if ((strpos($index, '{')) !== false) {
-                $index = trim($index, '{}');
-                // self::setParam($request, $index);
-                if (substr($value, -3) === '...') {
-                    $items = array_slice($availableParams, ($i + 1));
-                    $request->params[$index] = $items;
-                    $request->expanding = true;
-                }
-                else
-                {
-                    if (isset($availableParams[$i])) {
-                        $request->params[$index] = $availableParams[$i];
-                    } else {
-                        $request->params[$index] = '';
-                    }
-                }
-            }
-            if ($i !== ($paramSize - 1))
-            {
-                $layout = [$index => $layout];
-                $layoutSize++;
-            }
-            else
-            {
-                $layout = [$index => $request];
-                $layoutSize++;
-            }
-        } */
         if (empty($clientRequest->route ?? []))
         {
             for ($i = 0; $i < $paramSize; $i++)
@@ -169,20 +137,21 @@ class RequestFactory
             $entry[$key] = [];
             $entry = &$entry[$key];
             $layoutSize++;
-            if ((strpos($value, '{')) !== false) {
-                self::setParam($request, $i, $value, $clientRequest->listed);
-                if ($request->expanding) break;
-                if (! is_object($route))
-                {
+            if (! is_object($route))
+            {
+                if ((strpos($value, '{')) !== false) {
+                    self::setParam($request, $i, $value, $clientRequest->listed);
+                    if ($request->expanding) break;
+                    
                     $keys = array_keys($route);
                     $route = $route[$keys[0]];
                     continue;
                 }
-            }
-            if (! is_object($route) && isset($route[$key]))
-            {
-                $route = $route[$key];
-                continue;
+                if (isset($route[$key]))
+                {
+                    $route = $route[$key];
+                    continue;
+                }
             }
             return false;
         }
