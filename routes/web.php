@@ -3,7 +3,6 @@
 /**
  *  Documentation
  */
-// $this->get('/', 'Home@Index')->output(config('PATHS.ROOT~STORAGE'));
 $this->get('/', 'Home@Index');
 $this->get('document/', 'Home@Document');
 /**
