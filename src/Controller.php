@@ -91,7 +91,9 @@ class Controller implements IController
             if (($content = $this->view->render()) !== false)
             {
                 echo $content;
-                $this->getRequest()->triggerRendered();
+                $request = $this->getRequest();
+                $request->view = $this->view;
+                $request->triggerRendered();
                 return true;
             }
         }

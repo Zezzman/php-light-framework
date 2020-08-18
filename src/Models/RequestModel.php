@@ -40,7 +40,7 @@ abstract class RequestModel implements IRequest
      * and output new view at set refresh rate
      * 
      */
-    public abstract function staticView(string $file, int $refreshRate);
+    public abstract function staticView(int $refreshRate, string $refreshType, string $path, string $file);
     /**
      * Empty Request
      */

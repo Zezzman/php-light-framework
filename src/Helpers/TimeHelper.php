@@ -14,16 +14,23 @@ final class TimeHelper
     {
         return $this->format();
     }
-    public function __construct(string $dateString = null, string $format = null)
+    public function __construct($dateString = null, string $format = null)
     {
-        if (is_null($dateString) || empty($dateString)) {
-            $this->dateString = date_create();
-        } else {
+        if (is_numeric($dateString))
+        {
+            $this->dateString = date_create(date('Y-m-d H:i:s.u', $dateString));
+        }
+        else if (is_string($dateString))
+        {
             if (is_null($format)) {
                 $this->dateString = date_create($dateString);
             } else {
                 $this->dateString = date_create_from_format($format, $dateString);
             }
+        }
+        else if (is_null($dateString) || empty($dateString))
+        {
+            $this->dateString = date_create();
         }
         if (! ($this->dateString)) {
             $this->dateString = false;
@@ -113,6 +120,12 @@ final class TimeHelper
             $interval = 'P'. abs($amount). 'Y';
         } elseif ($type === 'weeks') {
             $interval = 'P'. abs($amount). 'W';
+        } elseif ($type === 'hours') {
+            $interval = 'PT'. abs($amount). 'H';
+        } elseif ($type === 'minutes') {
+            $interval = 'PT'. abs($amount). 'M';
+        } elseif ($type === 'seconds') {
+            $interval = 'PT'. abs($amount). 'S';
         }
         if ($interval !== '') {
             $this->dateString->add(new \DateInterval($interval));
@@ -138,6 +151,12 @@ final class TimeHelper
             $interval = 'P'. abs($amount). 'Y';
         } elseif ($type === 'weeks') {
             $interval = 'P'. abs($amount). 'W';
+        } elseif ($type === 'hours') {
+            $interval = 'PT'. abs($amount). 'H';
+        } elseif ($type === 'minutes') {
+            $interval = 'PT'. abs($amount). 'I';
+        } elseif ($type === 'seconds') {
+            $interval = 'PT'. abs($amount). 'S';
         }
         if ($interval !== '') {
             $this->dateString->sub(new \DateInterval($interval));
@@ -173,12 +192,12 @@ final class TimeHelper
      * 
      * @return      date_diff      true if given time is larger than time instance
      */
-    public function diff($date = null)
+    public function diff($date)
     {
         if (empty($this->dateString)) {
             return false;
         }
-        if (is_string($date)) {
+        if (is_string($date) || is_numeric($date)) {
             $date = self::create($date);
         } elseif (! is_object($date) && ! ($date instanceof self)){
             return false;
@@ -196,12 +215,12 @@ final class TimeHelper
      * 
      * @return      bool            true if given date is larger than date instance
      */
-    public function smallerThan($date = null)
+    public function smallerThan($date)
     {
         if (empty($this->dateString)) {
             return false;
         }
-        if (is_string($date)) {
+        if (is_string($date) || is_numeric($date)) {
             $date = self::create($date);
         } elseif (! is_object($date) && ! ($date instanceof self)){
             return false;
@@ -219,12 +238,12 @@ final class TimeHelper
      * 
      * @return      bool            true if given date is smaller than date instance
      */
-    public function largerThan($date = null)
+    public function largerThan($date)
     {
         if (empty($this->dateString)) {
             return false;
         }
-        if (is_string($date)) {
+        if (is_string($date) || is_numeric($date)) {
             $date = self::create($date);
         } elseif (! is_object($date) && ! ($date instanceof self)){
             return false;
@@ -242,12 +261,12 @@ final class TimeHelper
      * 
      * @return      bool            true if given date is smaller than date instance
      */
-    public function equalTo($date = null)
+    public function equalTo($date)
     {
         if (empty($this->dateString)) {
             return false;
         }
-        if (is_string($date)) {
+        if (is_string($date) || is_numeric($date)) {
             $date = self::create($date);
         } elseif (! is_object($date) && ! ($date instanceof self)){
             return false;

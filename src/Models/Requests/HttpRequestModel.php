@@ -6,6 +6,8 @@ use System\Models\RequestModel;
 use System\Providers\EnvironmentProvider;
 use System\Providers\AuthProvider;
 use System\Helpers\HTTPHelper;
+use System\Helpers\TimeHelper;
+use System\Helpers\FileHelper;
 /**
  * 
  */
@@ -21,6 +23,7 @@ class HttpRequestModel extends RequestModel
     public $method = '';
     public $redirect = null;
     public $view = null;
+    public $viewString = null;
     public $model = null;
     public $settings = [];
     
@@ -67,7 +70,17 @@ class HttpRequestModel extends RequestModel
         }
         return true;
     }
-    
+    /**
+     * Set Cache Locations
+     */
+    public function cache(string $path)
+    {
+        if ((empty($path) || is_dir($path)) && ! empty($this->viewString))
+        {
+            $path .= ($this->viewString. '.html');
+        }
+        $this->cachedLocation = $path;
+    }
     /**
      * Search settings
      */
@@ -107,6 +120,19 @@ class HttpRequestModel extends RequestModel
             }
         }
         return $params;
+    }
+    /**
+     * Set View
+     */
+    public function setView(string $viewString, IViewModel $model = null)
+    {
+        if ($this->valid() && ! empty($viewString))
+        {
+            $request = $this;
+            $request->viewString = $viewString;
+            $request->model = $model;
+        }
+        return $this;
     }
 
     /* Matching Actions */
@@ -201,22 +227,6 @@ class HttpRequestModel extends RequestModel
                 || $request->method === 'OPTIONS')) {
                     $request->respond(405, 'Request Method not allowed');
                 }
-            };
-        }
-        return $this;
-    }
-    /**
-     * Set View
-     */
-    public function setView(string $view, IViewModel $model = null)
-    {
-        if ($this->valid() && ! empty($view))
-        {
-            $request = $this;
-            $this->onMatching[] = function () use ($request, $view, $model)
-            {
-                $request->view = $view;
-                $request->model = $model;
             };
         }
         return $this;
@@ -442,13 +452,35 @@ class HttpRequestModel extends RequestModel
      * Output Static View to file
      * 
      */
-    public function output(string $file)
+    public function output(string $path = '', string $file = '')
     {
         if ($this->valid()) {
-            $this->onRendered[] = function () use ($file)
+            $path = ((empty($path)) ? '': trim($path, '/'). '/');
+            if (empty($file))
             {
-                
-            };
+                $file = 'index.html';
+                if (empty($this->viewString))
+                {
+                    $path = $path. trim($this->uri, '/') . '/';
+                }
+                else
+                {
+                    $path = $path. $this->viewString . '/';
+                }
+            }
+            if (! empty($path) && ! empty($file))
+            {
+                $path = config('PATHS.ROOT'). $path;
+                $this->onRendered[] = function ($self) use ($path, $file)
+                {
+                    if (is_null($self->view)) return;
+                    if (! is_dir($path. $file))
+                    {
+                        if (! file_exists($path) && ! mkdir($path, 0755, true)) return;
+                        file_put_contents($path. $file, $self->view->getContent());
+                    }
+                };
+            }
         }
         return $this;
     }
@@ -457,13 +489,22 @@ class HttpRequestModel extends RequestModel
      * and output new view at set refresh rate
      * 
      */
-    public function staticView(string $file, int $refreshRate)
+    public function staticView(int $refreshRate, string $refreshType = 'minutes', string $path = 'public', string $file = '')
     {
         if ($this->valid()) {
-            $this->onRendered[] = function () use ($file, $refreshRate)
+            $dir = config('PATHS.ROOT'). ((empty($path)) ? '': trim($path, '/'). '/');
+            if (is_file($dir . $file))
             {
-                
-            };
+                $refreshAt = TimeHelper::create(filemtime($dir. $file))->add($refreshRate, $refreshType);
+                if (TimeHelper::create()->smallerThan($refreshAt))
+                {
+                    $this->controller = null;
+                    $this->action = null;
+                    $this->cachedLocation = $dir. $file;
+                    return;
+                }
+            }
+            $this->output($path, $file);
         }
         return $this;
     }

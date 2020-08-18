@@ -159,20 +159,23 @@ final class Launcher
     private function webController(IRequest $request = null)
     {
         if (! is_null($request)) {
+            $cache = $request->cachedLocation;
             $controller = $request->controller;
             $action = $request->action;
             $params = $request->params;
-            $view = $request->view;
+            $view = $request->viewString;
 
             if (! is_null($request->response)) {
                 Controller::respond($request->response, $request->message, $request);
             }
             try {
                 http_response_code(200);
-                if (! is_null($controller) && ! is_null($action) && ! is_null($params)) {
+                if (! is_null($cache) && is_file($cache)) {
+                    $this->printView($request);
+                } else if (! is_null($controller) && ! is_null($action) && ! is_null($params)) {
                     $path = requireConfig('NAMESPACES.CONTROLLERS') . "{$controller}Controller";
                     $controller = $this->executeController($request, $path, $action, $params);
-                } else if(! is_null($view)) {
+                } else if (! is_null($view)) {
                     $controller = $this->executeView($request, $view, $params);
                 } else {
                     Controller::respond(404, '', $request);
@@ -299,6 +302,15 @@ final class Launcher
         $controller->view($view, ($request->model ?? null), $params);
         $controller->render();
         return $controller;
+    }
+    private function printView(IRequest $request)
+    {
+        if (is_file($request->cachedLocation))
+        {
+            $request->triggerProcessed();
+            echo file_get_contents($request->cachedLocation);
+            $request->triggerRendered();
+        }
     }
     public function isAuth()
     {

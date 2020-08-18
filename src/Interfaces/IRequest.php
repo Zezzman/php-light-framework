@@ -8,7 +8,7 @@ interface IRequest
     function valid();
 
     function output(string $file);
-    function staticView(string $file, int $refreshRate);
+    function staticView(int $refreshRate, string $refreshType, string $path, string $file);
 
     static function empty();
 }

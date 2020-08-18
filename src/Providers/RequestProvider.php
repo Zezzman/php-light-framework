@@ -81,7 +81,11 @@ final class RequestProvider
     private function createRequest(string $method, string $requestString, string $actionString = '')
     {
         $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request, $this->designatedRoutes);
-        if (! is_null($currentRequest) && config('PERMISSIONS.ALLOW_GUESTS') === false) {
+        if (is_null($currentRequest) )
+        {
+            $currentRequest = RequestFactory::emptyHttpRequest();
+        }
+        if (config('PERMISSIONS.ALLOW_GUESTS') === false) {
             if ($this->isGuest())
             {
                 if ($currentRequest->settings('AUTH.GUEST.VISIBLE_RESTRICTIONS', true) === true)

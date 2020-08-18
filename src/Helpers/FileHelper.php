@@ -184,12 +184,7 @@ final class FileHelper
     {
         $name = DataCleanerHelper::cleanValue($name);
 
-        $root = config('PATHS.ROOT');
-        if (file_exists($path = ($root .  $name)))
-        {
-            return $path;
-        }
-        else if (($path = self::findResource($name)) !== false)
+        if (($path = self::findResource($name)) !== false)
         {
             return $path;
         }
@@ -208,13 +203,41 @@ final class FileHelper
     }
     public static function findResource(string $name)
     {
+        if (empty($name)) return false;
+
         $root = requireConfig('PATHS.ROOT');
+        if (file_exists($path = $root .  $name)) return $path;
+
         $resources = (array) requireConfig('PATHS.RESOURCES');
         foreach ($resources as $resource)
         {
             if (file_exists($path = $root . $resource .  $name))
             {
                 return $path;
+            }
+        }
+        return false;
+    }
+    /**
+     * Check if dir/file path is within resource directories
+     * 
+     * @param   string      $path               full_dir_path
+     * 
+     * @return  bool        true if dir/file path is within resources
+     */
+    public static function withinResources(string $path)
+    {
+        if (empty($path)) return false;
+
+        $root = requireConfig('PATHS.ROOT');
+        if (substr($path, 0, strlen($root)) === $root) return true;
+
+        $resources = (array) requireConfig('PATHS.RESOURCES');
+        foreach ($resources as $key => $resource)
+        {
+            $resourcePath = $root. $resource;
+            if (substr($path, 0, strlen($resourcePath)) === $resourcePath) {
+                return $key;
             }
         }
         return false;

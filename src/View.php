@@ -101,6 +101,13 @@ class View
         return $bag;
     }
     /**
+     * View Content
+     */
+    public function getContent()
+    {
+        return $this->content;
+    }
+    /**
      * 
      */
     public function appendView(string $name, string $type, IViewModel $model = null, array $bag = [])
@@ -132,7 +139,7 @@ class View
     /**
      * Append Content After Views and Layout
      */
-    public function append(string $content)
+    public function append(string $content, string $view = null)
     {
         if (is_null($view))
         {
