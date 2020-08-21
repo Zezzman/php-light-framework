@@ -59,11 +59,11 @@ final class RequestProvider
         {
             foreach ($this->designatedRequests as $key => $request)
             {
+                $request->triggerMatching();
                 if ($this->request->requestMethod($request->method))
                 {
                     if (! $selectedRequest->valid() || $request->size > $selectedRequest->size)
                     {
-                        $request->triggerMatching();
                         $request->uri = $this->request->uri;
                         $request->triggerMatched();
                         $selectedRequest = $request;

@@ -8,6 +8,7 @@ use System\Providers\AuthProvider;
 use System\Helpers\HTTPHelper;
 use System\Helpers\TimeHelper;
 use System\Helpers\FileHelper;
+use System\Helpers\QueryHelper;
 /**
  * 
  */
@@ -59,6 +60,24 @@ class HttpRequestModel extends RequestModel
         }
     }
     /**
+     * Check if request is valid
+     * 
+     * Request needs specific fields filled
+     * to be a valid request
+     * 
+     * @return   boolean    returns true if request is valid
+     */
+    public function validChain()
+    {
+        if ($this->chainState === false
+        || ! is_null($this->response)
+        || ! is_array($this->route)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    /**
      * Compare given method with request method
      */
     public function requestMethod($method)
@@ -75,11 +94,16 @@ class HttpRequestModel extends RequestModel
      */
     public function cache(string $path)
     {
-        if ((empty($path) || is_dir($path)) && ! empty($this->viewString))
+        if ($this->validChain())
         {
-            $path .= ($this->viewString. '.html');
+            $this->onMatched(function ($self) use ($path)
+            {
+                $newFile = QueryHelper::insertCodes($self->params, $path);
+                $path = (empty($newFile) ? $path : $newFile);
+                $self->cachedLocation = $path;
+            });
         }
-        $this->cachedLocation = $path;
+        return $this;
     }
     /**
      * Search settings
@@ -126,7 +150,7 @@ class HttpRequestModel extends RequestModel
      */
     public function setView(string $viewString, IViewModel $model = null)
     {
-        if ($this->valid() && ! empty($viewString))
+        if ($this->validChain() && ! empty($viewString))
         {
             $request = $this;
             $request->viewString = $viewString;
@@ -142,13 +166,12 @@ class HttpRequestModel extends RequestModel
     public function setParams($params)
     {
         if (! empty($params)
-        && $this->valid())
+        && $this->validChain())
         {
-            $request = $this;
-            $this->onMatching[] = function () use ($request, $params)
+            $this->onMatching(function ($self) use ($params)
             {
-                $request->params = $request->getParams($params);
-            };
+                $self->params = $self->getParams($params);
+            });
         }
         
         return $this;
@@ -160,13 +183,12 @@ class HttpRequestModel extends RequestModel
     public function addParams($params)
     {
         if (! empty($params)
-        && $this->valid())
+        && $this->validChain())
         {
-            $request = $this;
-            $this->onMatching[] = function () use ($request, $params)
+            $this->onMatching(function ($self) use ($params)
             {
-                $request->params = array_merge($request->params, $request->getParams($params));
-            };
+                $self->params = array_merge($self->params, $self->getParams($params));
+            });
         }
         return $this;
     }
@@ -177,10 +199,10 @@ class HttpRequestModel extends RequestModel
     {
         $serverHeaders = $_SERVER;
         $headers = (array) $header;
-        if ($this->valid() && ! empty($headers))
+        if ($this->validChain() && ! empty($headers))
         {
             $request = $this;
-            $this->onMatching[] = function () use ($request, $headers, $serverHeaders)
+            $this->onMatching(function () use ($request, $headers, $serverHeaders)
             {
                 foreach ($headers as $key => $header)
                 {
@@ -204,7 +226,7 @@ class HttpRequestModel extends RequestModel
                         $request->respond(404, 'Headers do not match');
                     }
                 }
-            };
+            });
         }
         return $this;
     }
@@ -214,10 +236,10 @@ class HttpRequestModel extends RequestModel
     public function hasMethod($method)
     {
         $methods = (array) $method;
-        if ($this->valid() && ! empty($this->method) && ! empty($method))
+        if ($this->validChain() && ! empty($this->method) && ! empty($method))
         {
             $request = $this;
-            $this->onMatching[] = function () use ($request, $methods)
+            $this->onMatching(function () use ($request, $methods)
             {
                 foreach ($methods as $key => $value)
                 {
@@ -227,7 +249,7 @@ class HttpRequestModel extends RequestModel
                 || $request->method === 'OPTIONS')) {
                     $request->respond(405, 'Request Method not allowed');
                 }
-            };
+            });
         }
         return $this;
     }
@@ -236,10 +258,10 @@ class HttpRequestModel extends RequestModel
      */
     public function isAuth()
     {
-        if ($this->valid())
+        if ($this->validChain())
         {
             $request = $this;
-            $this->onMatching[] = function () use ($request)
+            $this->onMatching(function () use ($request)
             {
                 if (! AuthProvider::isAuthorized())
                 {
@@ -262,7 +284,7 @@ class HttpRequestModel extends RequestModel
                         }
                     }
                 }
-            };
+            });
         }
         return $this;
     }
@@ -271,10 +293,10 @@ class HttpRequestModel extends RequestModel
      */
     public function isGuest()
     {
-        if ($this->valid())
+        if ($this->validChain())
         {
             $request = $this;
-            $this->onMatching[] = function () use ($request)
+            $this->onMatching(function () use ($request)
             {
                 if (AuthProvider::isAuthorized())
                 {
@@ -287,7 +309,7 @@ class HttpRequestModel extends RequestModel
                         $request->respond(404);
                     }
                 }
-            };
+            });
         }
         return $this;
     }
@@ -297,9 +319,9 @@ class HttpRequestModel extends RequestModel
     public function hasExtension($ext)
     {
         $extensions = (array) $ext;
-        if ($this->valid()) {
+        if ($this->validChain()) {
             $request = $this;
-            $this->onMatching[] = function () use ($request, $extensions)
+            $this->onMatching(function () use ($request, $extensions)
             {
                 foreach ($extensions as $file => $type) {
                     $extension = '';
@@ -334,7 +356,7 @@ class HttpRequestModel extends RequestModel
                         }
                     }
                 }
-            };
+            });
         }
         return $this;
     }
@@ -343,9 +365,9 @@ class HttpRequestModel extends RequestModel
      */
     public function redirect(string $uri, bool $clearParams = true, int $code = 307)
     {
-        if (! $this->valid()) {
+        if (! $this->validChain()) {
             $request = $this;
-            $this->onMatching[] = function () use ($request, $uri, $clearParams, $code)
+            $this->onMatching(function () use ($request, $uri, $clearParams, $code)
             {
                 if (is_null($request->redirect))
                 {
@@ -353,12 +375,12 @@ class HttpRequestModel extends RequestModel
                     if ($clearParams === true) {
                         $request->params = [];
                     }
-                    $request->onMatched['redirect'] = function () use ($request, $code)
+                    $request->onMatched(function () use ($request, $code)
                     {
                         http_response_code($code);
-                    };
+                    }, 'redirect');
                 }
-            };
+            });
         }
         return $this;
     }
@@ -369,36 +391,13 @@ class HttpRequestModel extends RequestModel
      */
     public function changeAction(string $actionString)
     {
-        if ($this->valid())
+        if ($this->validChain())
         {
             $request = $this;
-            $this->onMatching[] = function () use ($request, $actionString)
+            $this->onMatching(function () use ($request, $actionString)
             {
                 RequestFactory::controllerAction($request, $actionString);
-            };
-        }
-        return $this;
-    }
-    /**
-     * Close request on $state true
-     */
-    public function close($state)
-    {
-        if ($this->valid()) {
-            $this->onMatching[] = function ()
-            {
-                if (\is_callable($state))
-                {
-                    if (! empty($state()))
-                    {
-                        return false;
-                    }
-                }
-                else if (! empty($state))
-                {
-                    return false;
-                }
-            };
+            });
         }
         return $this;
     }
@@ -407,14 +406,14 @@ class HttpRequestModel extends RequestModel
      */
     public function isValid()
     {
-        if ($this->valid()) {
-            $this->onMatching[] = function ()
+        if ($this->validChain()) {
+            $this->onMatching(function ()
             {
                 if (! $this->valid())
                 {
                     return false;
                 }
-            };
+            });
         }
         return $this;
     }
@@ -426,7 +425,7 @@ class HttpRequestModel extends RequestModel
     {
         if (is_string($environment) || is_array($environment))
         {
-            if ($this->valid()) {
+            if ($this->validChain()) {
                 if (is_string($environment)) {
                     $this->settings = EnvironmentProvider::instance()->loadEnvironment($environment);
                 }
@@ -435,13 +434,13 @@ class HttpRequestModel extends RequestModel
                     $this->settings = $environment;
                 }
                 $request = $this;
-                $this->onMatched['setEnvironment'] = function () use ($request)
+                $this->onMatched(function () use ($request)
                 {
                     if (is_array($request->settings) && ! empty($request->settings))
                     {
                         EnvironmentProvider::instance()->add($request->settings);
                     }
-                };
+                }, 'setEnvironment');
             }
         }
         return $this;
@@ -454,57 +453,60 @@ class HttpRequestModel extends RequestModel
      */
     public function output(string $path = '', string $file = '')
     {
-        if ($this->valid()) {
+        if ($this->validChain())
+        {
             $path = ((empty($path)) ? '': trim($path, '/'). '/');
-            if (empty($file))
+            $this->onRendered(function ($self) use ($path, $file)
             {
-                $file = 'index.html';
-                if (empty($this->viewString))
+                if (is_null($self->view)) return;
+                $newFile = QueryHelper::insertCodes($self->params, $file);
+                $file = (empty($newFile) ? $file : $newFile);
+                if (empty($file))
                 {
-                    $path = $path. trim($this->uri, '/') . '/';
+                    $file = 'index.html';
+                    $path = $path. trim($self->uri, '/') . '/';
                 }
-                else
-                {
-                    $path = $path. $this->viewString . '/';
-                }
-            }
-            if (! empty($path) && ! empty($file))
-            {
                 $path = config('PATHS.ROOT'). $path;
-                $this->onRendered[] = function ($self) use ($path, $file)
+                if (! is_dir($path. $file))
                 {
-                    if (is_null($self->view)) return;
-                    if (! is_dir($path. $file))
-                    {
-                        if (! file_exists($path) && ! mkdir($path, 0755, true)) return;
-                        file_put_contents($path. $file, $self->view->getContent());
-                    }
-                };
-            }
+                    if (! file_exists($path) && ! mkdir($path, 0755, true)) return;
+                    file_put_contents($path. $file, $self->view->getContent());
+                }
+            });
         }
         return $this;
     }
     /**
      * Output Static View to file
-     * and output new view at set refresh rate
      * 
+     * Re-output view to file at refresh rate
+     * or loaded file as cache
      */
-    public function staticView(int $refreshRate, string $refreshType = 'minutes', string $path = 'public', string $file = '')
+    public function staticView(int $refreshRate = null, string $refreshType = 'minutes', string $path = 'public', string $file = '')
     {
-        if ($this->valid()) {
-            $dir = config('PATHS.ROOT'). ((empty($path)) ? '': trim($path, '/'). '/');
-            if (is_file($dir . $file))
+        if ($this->validChain())
+        {
+            $path = ((empty($path)) ? '': trim($path, '/'). '/');
+            $this->onMatched(function ($self) use ($path, $file)
             {
-                $refreshAt = TimeHelper::create(filemtime($dir. $file))->add($refreshRate, $refreshType);
-                if (TimeHelper::create()->smallerThan($refreshAt))
+                if (is_null($self->view)) return;
+                if (empty($file))
                 {
-                    $this->controller = null;
-                    $this->action = null;
-                    $this->cachedLocation = $dir. $file;
-                    return;
+                    $file = 'index.html';
+                    $path = $path. trim($self->uri, '/') . '/';
                 }
-            }
-            $this->output($path, $file);
+                $dir = config('PATHS.ROOT'). $path;
+                if (($refreshRate ?? 0) > 0 && is_file($dir . $file))
+                {
+                    $refreshAt = TimeHelper::create(filemtime($dir. $file))->add($refreshRate, $refreshType);
+                    if (TimeHelper::create()->smallerThan($refreshAt))
+                    {
+                        $self->cache($dir. $file);
+                        return;
+                    }
+                }
+                $self->output($path, $file);
+            });
         }
         return $this;
     }

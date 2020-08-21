@@ -155,11 +155,9 @@ class RequestFactory
             }
             return false;
         }
-        if ($layoutSize !== $clientRequest->size
-        && ! $request->expanding)
-        {
-            return false;
-        }
+        if ($layoutSize !== $clientRequest->size && ! $request->expanding) return false;
+        if (($request->method !== $clientRequest->method)) return false;
+        
         $entry = $request;
         $routesEntry[] = $request;
         $designatedRoutes = $routes;

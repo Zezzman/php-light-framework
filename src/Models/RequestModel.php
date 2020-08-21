@@ -7,7 +7,7 @@ use System\Interfaces\IRequest;
  */
 abstract class RequestModel implements IRequest
 {
-    public $timestamp = null;
+    public $chainState = true;
 
     public $type = null;
     public $controller = null;
@@ -16,10 +16,10 @@ abstract class RequestModel implements IRequest
     public $response = null;
     public $message = null;
     
-    public $onMatching = [];
-    public $onMatched = [];
-    public $onProcessed = [];
-    public $onRendered = [];
+    private $onMatching = [];
+    private $onMatched = [];
+    private $onProcessed = [];
+    private $onRendered = [];
 
     /**
      * Check if request is valid
@@ -34,13 +34,13 @@ abstract class RequestModel implements IRequest
      * Output Static View to file
      * 
      */
-    public abstract function output(string $file);
+    public abstract function output(string $path = '', string $file = '');
     /**
      * Output Static View to file
      * and output new view at set refresh rate
      * 
      */
-    public abstract function staticView(int $refreshRate, string $refreshType, string $path, string $file);
+    public abstract function staticView(int $refreshRate = null, string $refreshType = 'minutes', string $path = 'public', string $file = '');
     /**
      * Empty Request
      */
@@ -71,7 +71,7 @@ abstract class RequestModel implements IRequest
      */
     public function triggerMatching()
     {
-        foreach ($this->onMatching as $action)
+        foreach ($this->onMatching as $key => $action)
         {
             if (\is_callable($action))
             {
@@ -90,7 +90,7 @@ abstract class RequestModel implements IRequest
      */
     public function triggerMatched()
     {
-        foreach ($this->onMatched as $action)
+        foreach ($this->onMatched as $key => $action)
         {
             if (\is_callable($action))
             {
@@ -109,7 +109,7 @@ abstract class RequestModel implements IRequest
      */
     public function triggerProcessed()
     {
-        foreach ($this->onProcessed as $action)
+        foreach ($this->onProcessed as $key => $action)
         {
             if (\is_callable($action))
             {
@@ -128,7 +128,7 @@ abstract class RequestModel implements IRequest
      */
     public function triggerRendered()
     {
-        foreach ($this->onRendered as $action)
+        foreach ($this->onRendered as $key => $action)
         {
             if (\is_callable($action))
             {
@@ -208,6 +208,48 @@ abstract class RequestModel implements IRequest
                 $this->onRendered[] = $func;
             }
         }
+        return $this;
+    }
+
+    /**
+     * Allow chain to continue if statement is true
+     */
+    public function if($statement)
+    {
+        if (\is_callable($statement))
+        {
+            $this->chainState = (! empty($statement));
+        }
+        else
+        {
+            $this->chainState = (! empty($statement));
+        }
+        return $this;
+    }
+    /**
+     * Allow chain to continue if statement is false
+     */
+    public function else()
+    {
+        $this->chainState = (! $this->chainState);
+        return $this;
+    }
+    /**
+     * Allow chain to continue if statement is false
+     */
+    public function close()
+    {
+        $this->onMatching(function ($self) use ($statement)
+        {
+            if (\is_callable($statement))
+            {
+                return (! empty($statement($self)));
+            }
+            else
+            {
+                return (! empty($statement));
+            }
+        });
         return $this;
     }
 }
