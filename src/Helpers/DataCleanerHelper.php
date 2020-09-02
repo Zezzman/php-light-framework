@@ -23,9 +23,6 @@ final class DataCleanerHelper
         $cleanData = trim($cleanData, '/');
         $cleanData = htmlspecialchars($cleanData);
         $cleanData = strip_tags($cleanData);
-        if (get_magic_quotes_gpc()) {
-            $cleanData = stripslashes($cleanData);
-        }
 
         return $cleanData;
     }
