@@ -40,12 +40,15 @@ final class Launcher
 
             // Default debug output
             if (getenv('DEBUG') == true) {
+                if (getenv('LOG_STRUCTURE') == true) echo "Set DEBUG = true<br>\n";
+                
                 error_reporting(E_ALL);
                 ini_set('display_errors', E_ALL);
             }
 
             // Load configurations
             $instance->environment = EnvironmentProvider::instance();
+            if (getenv('LOG_STRUCTURE') == true) echo "Environment Setup<br>\n";
             $instance->environment->setup();
 
             // Create Router
@@ -80,6 +83,8 @@ final class Launcher
      */
     public function getRequest()
     {
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Process Client Resource Request<br>\n";
+
         if ($this->router->type() === 'webserver') {
             return $this->getWebRequest();
         } elseif ($this->router->type() === 'api') {
@@ -171,11 +176,17 @@ final class Launcher
             try {
                 http_response_code(200);
                 if (! is_null($cache) && is_file($cache)) {
+                    if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Loading Static Page<br>\n";
+
                     $this->printView($request);
                 } else if (! is_null($controller) && ! is_null($action) && ! is_null($params)) {
+                    if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Executing Controller's Action Function<br>\n";
+                    
                     $path = requireConfig('NAMESPACES.CONTROLLERS') . "{$controller}Controller";
                     $controller = $this->executeController($request, $path, $action, $params);
                 } else if (! is_null($view)) {
+                    if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Loading View Page<br>\n";
+                    
                     $controller = $this->executeView($request, $view, $params);
                 } else {
                     Controller::respond(404, '', $request);
@@ -281,6 +292,8 @@ final class Launcher
                     } else {
                         $controller->$action();
                     }
+                    if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Executed $controllerPath::$action()<br>\n";
+                    
                     $controller->render();
                     return $controller;
                 } else {
@@ -300,6 +313,8 @@ final class Launcher
     {
         $controller = new Controller($request);
         $controller->view($view, ($request->model ?? null), $params);
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Loaded View: $view<br>\n";
+
         $controller->render();
         return $controller;
     }
@@ -308,7 +323,14 @@ final class Launcher
         if (is_file($request->cachedLocation))
         {
             $request->triggerProcessed();
-            echo file_get_contents($request->cachedLocation);
+            if (! config('SETTINGS.LOG_STRUCTURE', false))
+            {
+                echo file_get_contents($request->cachedLocation);
+            }
+            else
+            {
+                echo "Loaded Static Page: $request->cachedLocation<br>\n";
+            }
             $request->triggerRendered();
         }
     }

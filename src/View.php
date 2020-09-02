@@ -250,12 +250,13 @@ class View
         $body = '';
         
         // render views
-        $this->addToBag(config('APP', null));
+        $this->addToBag(config('APP', []));
         foreach ($this->viewData as $view) {
             $this->currentView = $view;
             if (($viewContent = $this->loadFile($view->path)) !== false) {
                 $body .= $view->prepend . $viewContent . $view->append;
                 $hasView = true;
+                if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Loaded View: $view->path<br>\n";
             }
         }
         // buffer layout
@@ -271,6 +272,8 @@ class View
                 'layout' => ('../public/assets/css/' . $this->layout . (($minify) ? '.min.css' : '.css'))
             ])) !== false)
             {
+                if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Loaded Layout: layouts/$this->layout.php<br>\n";
+
                 $this->hasRendered = true;
                 // render view
                 $this->content = $this->prepend . $layout . $this->append;
@@ -281,7 +284,7 @@ class View
             }
         }
         $this->cacheCards = [];
-        ob_end_clean();
+        if (! config('SETTINGS.LOG_STRUCTURE', false)) ob_end_clean();
         return $this->content;
     }
     /**

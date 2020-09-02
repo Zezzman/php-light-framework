@@ -213,6 +213,8 @@ final class EnvironmentProvider
             $path = $cwd . '/configs/' . $name . '.php';
             if (file_exists($path)) {
                 $config = require($path);
+                if (getenv('LOG_STRUCTURE') == true) echo "Loaded: $config<br>\n";
+
                 if (is_array($config)) {
                     $this->files[$name] = 1;
                     return $config;

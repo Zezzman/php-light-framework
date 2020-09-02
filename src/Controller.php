@@ -87,13 +87,22 @@ class Controller implements IController
     {
         if ($this->view instanceof \System\View)
         {
+            if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Rendering View<br>\n";
+
             $this->getRequest()->triggerProcessed();
             if (($content = $this->view->render()) !== false)
             {
-                echo $content;
-                $request = $this->getRequest();
-                $request->view = $this->view;
-                $request->triggerRendered();
+                if (! config('SETTINGS.LOG_STRUCTURE', false))
+                {
+                    echo $content;
+                    $request = $this->getRequest();
+                    $request->view = $this->view;
+                    $request->triggerRendered();
+                }
+                else
+                {
+                    echo "Rendered View<br>\n";
+                }
                 return true;
             }
         }
@@ -171,7 +180,7 @@ class Controller implements IController
                 {
                     if (config('SETTINGS.DEBUG', false))
                     {
-                        echo "({$code}) : ". $exception->getMessage();
+                        echo "({$code}) ". ((empty($exception)) ? '' : ': ' . $exception->getMessage());
                     }
                     else
                     {

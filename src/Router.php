@@ -56,10 +56,14 @@ class Router
     {
         // Client request
         $uri = HTTPHelper::URI();
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Web Request: $uri<br>\n";
         // Load available request
         $provider = new RequestProvider('http', config('PATHS.ROOT~ROUTES') . 'web.php', $uri);
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Load Available Requests<br>\n";
         // Find matching request
         $this->request = $provider->matchRequests();
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Matched Requests<br>\n";
+
         return $this->request;
     }
     /**
@@ -68,12 +72,18 @@ class Router
     public function apiRoutes()
     {
         $uri = HTTPHelper::URI();
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "API Request: $uri<br>\n";
+
         $provider = new RequestProvider('http', config('PATHS.ROOT~ROUTES') . 'api.php', $uri);
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Load Available Requests<br>\n";
+
         if ($this->requestMethod === 'OPTIONS') {
-            header('Access-Control-Allow-Origin: https://localhost');
+            header('Access-Control-Allow-Origin: '. \config('DOMAIN'));
             header("Access-Control-Max-Age: 3600");
         }
         $this->request = $provider->matchRequests();
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Matched Requests<br>\n";
+
         return $this->request;
     }
     /**
@@ -81,6 +91,8 @@ class Router
      */
     public function cliRoutes()
     {
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Process CLI Request\n";
+
         $commands = config('APP.ARGV');
         $provider = new CLIRequestProvider($commands);
         $cli = config('PATHS.ROOT~ROUTES') . 'cli.php';
@@ -90,6 +102,8 @@ class Router
             throw new Exception('CLI Route File Not Found');
         }
         $this->request = $provider->matchRequests($commands);
+        if (config('SETTINGS.LOG_STRUCTURE', false)) echo "Matched Requests<br>\n";
+        
         return $this->request;
     }
     /**
