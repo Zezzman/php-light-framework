@@ -39,7 +39,8 @@ final class Launcher
             $instance = new self();
 
             // Default debug output
-            if (getenv('DEBUG') == true) {
+            if (getenv('DEBUG') === 'true'
+            || getenv('DEBUG') === true) {
                 error_reporting(E_ALL);
                 ini_set('display_errors', E_ALL);
             }
