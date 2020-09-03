@@ -31,6 +31,10 @@ abstract class RequestModel implements IRequest
      */
     public abstract function valid();
     /**
+     * Check if request is empty
+     */
+    public abstract function isEmpty();
+    /**
      * Check if request match item
      * 
      * @param       mix         $pattern       item used to match against request

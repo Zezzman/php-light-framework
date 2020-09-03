@@ -6,6 +6,7 @@ namespace System\Interfaces;
 interface IRequest
 {
     function valid();
+    function isEmpty();
     function match($pattern);
     function replace($pattern, $replace);
 

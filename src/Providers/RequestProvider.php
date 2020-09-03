@@ -83,7 +83,7 @@ final class RequestProvider
     private function createRequest(string $method, string $requestString, string $actionString = '')
     {
         $currentRequest = RequestFactory::httpRequest($requestString, $actionString, $method, config('CLIENT_TYPE'), $this->request, $this->designatedRoutes);
-        if (is_null($currentRequest) )
+        if (is_null($currentRequest))
         {
             $currentRequest = RequestFactory::emptyHttpRequest();
         }
@@ -108,7 +108,7 @@ final class RequestProvider
     public function request(string $match, string $actionString = '')
     {
         $currentRequest = $this->createRequest(getenv('REQUEST_METHOD'), $match, $actionString);
-        if (! is_null($currentRequest)) {
+        if (! $currentRequest->isEmpty()) {
             $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;
@@ -119,7 +119,7 @@ final class RequestProvider
     public function get(string $match, string $actionString = '')
     {
         $currentRequest = $this->createRequest('GET', $match, $actionString);
-        if (! is_null($currentRequest)) {
+        if (! $currentRequest->isEmpty()) {
             $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;
@@ -130,7 +130,7 @@ final class RequestProvider
     public function post(string $match, string $actionString = '')
     {
         $currentRequest = $this->createRequest('POST', $match, $actionString);
-        if (! is_null($currentRequest)) {
+        if (! $currentRequest->isEmpty()) {
             $this->designatedRequests[] = $currentRequest;
         }
         return $currentRequest;

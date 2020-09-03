@@ -60,6 +60,19 @@ class HttpRequestModel extends RequestModel
         }
     }
     /**
+     * Check if request is empty
+     */
+    public function isEmpty()
+    {
+        if (empty($this->requestPattern)
+        || $this->size == 0
+        || empty($this->route)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
      * Check if request match item
      * 
      * @param       mix         $pattern       item used to match against request
