@@ -120,6 +120,7 @@ class RequestFactory
             $request->route = (array) $layout;
             $request->listed = $params;
             $request->size = $layoutSize;
+            $request->requestPattern = $requestString;
             return true;
         }
         $route = ($clientRequest->route ?? []);
@@ -165,6 +166,7 @@ class RequestFactory
         $request->route = (array) $layout;
         $request->listed = $params;
         $request->size = $layoutSize;
+        $request->requestPattern = $requestString;
         return true;
     }
     /**

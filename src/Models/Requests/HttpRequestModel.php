@@ -60,6 +60,39 @@ class HttpRequestModel extends RequestModel
         }
     }
     /**
+     * Check if request match item
+     * 
+     * @param       mix         $pattern       item used to match against request
+     * 
+     * @return      boolean     returns true if request match item
+     */
+    public function match($pattern)
+    {
+        if (empty($this->requestPattern) || ! is_string($pattern)) return false;
+
+        return (\preg_match($pattern, $this->requestPattern));
+    }
+    /**
+     * Replace request pattern
+     * 
+     * @param       mix         $pattern       item used to match against request
+     * @param       mix         $replace       replace item with this
+     * 
+     * @return      boolean     returns true if request match item
+     */
+    public function replace($pattern, $replace)
+    {
+        if (empty($this->requestPattern) || gettype($pattern) !== gettype($replace)
+        || ! is_string($pattern)) return false;
+
+        $oldRequest = $this->requestPattern;
+        $newRequest = (\preg_replace($pattern, $replace, $oldRequest));
+
+        if ($newRequest === $oldRequest) return false;
+        $this->requestPattern = $newRequest;
+        return $newRequest;
+    }
+    /**
      * Check if request is valid
      * 
      * Request needs specific fields filled
@@ -92,15 +125,22 @@ class HttpRequestModel extends RequestModel
     /**
      * Set Cache Locations
      */
-    public function cache(string $path)
+    public function cache(string $path = '', string $file = '')
     {
         if ($this->validChain())
         {
-            $this->onMatched(function ($self) use ($path)
+            $path = ((empty($trimPath = trim($path, '/'))) ? '': $trimPath. '/');
+            $this->onMatched(function ($self) use ($path, $file)
             {
-                $newFile = QueryHelper::insertCodes($self->params, $path);
-                $path = (empty($newFile) ? $path : $newFile);
-                $self->cachedLocation = $path;
+                if (is_null($self->uri)) return;
+                $newFile = QueryHelper::insertCodes($self->params, $file);
+                $file = (empty($newFile) ? $file : $newFile);
+                if (empty($file))
+                {
+                    $file = 'index.html';
+                    $path = $path. ((empty($uri = trim($self->uri, '/'))) ? '': $uri. '/');
+                }
+                $self->cachedLocation = config('PATHS.ROOT'). $path. $file;
             });
         }
         return $this;
@@ -455,7 +495,7 @@ class HttpRequestModel extends RequestModel
     {
         if ($this->validChain())
         {
-            $path = ((empty($path)) ? '': trim($path, '/'). '/');
+            $path = ((empty($trimPath = trim($path, '/'))) ? '': $trimPath. '/');
             $this->onRendered(function ($self) use ($path, $file)
             {
                 if (is_null($self->view)) return;
@@ -464,7 +504,7 @@ class HttpRequestModel extends RequestModel
                 if (empty($file))
                 {
                     $file = 'index.html';
-                    $path = $path. trim($self->uri, '/') . '/';
+                    $path = $path. ((empty($uri = trim($self->uri, '/'))) ? '': $uri. '/');
                 }
                 $path = config('PATHS.ROOT'). $path;
                 if (! is_dir($path. $file))
@@ -486,14 +526,14 @@ class HttpRequestModel extends RequestModel
     {
         if ($this->validChain())
         {
-            $path = ((empty($path)) ? '': trim($path, '/'). '/');
+            $path = ((empty($trimPath = trim($path, '/'))) ? '': $trimPath. '/');
             $this->onMatched(function ($self) use ($path, $file)
             {
                 if (is_null($self->view)) return;
                 if (empty($file))
                 {
                     $file = 'index.html';
-                    $path = $path. trim($self->uri, '/') . '/';
+                    $path = $path. ((empty($uri = trim($self->uri, '/'))) ? '': $uri. '/');
                 }
                 $dir = config('PATHS.ROOT'). $path;
                 if (($refreshRate ?? 0) > 0 && is_file($dir . $file))

@@ -31,6 +31,28 @@ abstract class RequestModel implements IRequest
      */
     public abstract function valid();
     /**
+     * Check if request match item
+     * 
+     * @param       mix         $pattern       item used to match against request
+     * 
+     * @return      boolean     returns true if request match item
+     */
+    public abstract function match($pattern);
+    /**
+     * Replace request pattern
+     * 
+     * @param       mix         $pattern       item used to match against request
+     * @param       mix         $replace       replace item with this
+     * 
+     * @return      boolean     returns true if request match item
+     */
+    public abstract function replace($pattern, $replace);
+    /**
+     * Set cache location for view
+     * 
+     */
+    public abstract function cache(string $path = '', string $file = '');
+    /**
      * Output Static View to file
      * 
      */

@@ -15,6 +15,7 @@ use Exception;
  */
 final class RequestProvider
 {
+    private $requestType = null;
     private $request = null;
     private $matchedRequest = null;
     private $designatedRequests = [];
@@ -22,6 +23,7 @@ final class RequestProvider
 
     public function __construct(string $requestType, string $routeFile, string $uri)
     {
+        $this->requestType = $requestType;
         $request = RequestFactory::simpleRequest($requestType, $uri, getenv('REQUEST_METHOD'), config('CLIENT_TYPE'));
         $this->request = $request;
         if (! empty($request))
@@ -164,6 +166,32 @@ final class RequestProvider
     public function isGuest()
     {
         return ! AuthProvider::isAuthorized();
+    }
+    /**
+     * Match regex to request
+     */
+    public function match($needle)
+    {
+        return $this->request->match($needle);
+    }
+    /**
+     * Match regex to request and replace
+     */
+    public function replace($needle, $replace)
+    {
+        if (empty($uri = $this->request->replace($needle, $replace))) return false;
+
+        $this->newClientRequest($uri);
+        return true;
+    }
+    /**
+     * Reconstruct client request
+     */
+    public function newClientRequest(string $uri)
+    {
+        $request = RequestFactory::simpleRequest($this->requestType, $uri, $this->request->method, $this->request->type);
+        if (empty($request)) return;
+        $this->request = $request;
     }
     /**
      * Create Response

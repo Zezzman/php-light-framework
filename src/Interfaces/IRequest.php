@@ -6,9 +6,12 @@ namespace System\Interfaces;
 interface IRequest
 {
     function valid();
+    function match($pattern);
+    function replace($pattern, $replace);
 
-    function output(string $file);
-    function staticView(int $refreshRate, string $refreshType, string $path, string $file);
+    function cache(string $path = '', string $file = '');
+    function output(string $path = '', string $file = '');
+    function staticView(int $refreshRate = null, string $refreshType = 'minutes', string $path = 'public', string $file = '');
 
     static function empty();
 }
